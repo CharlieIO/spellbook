@@ -63,7 +63,9 @@ export function QuizSelectionCard() {
             </SelectTrigger>
             <SelectContent>
               {classes.map((classItem) => (
-                <SelectItem key={classItem.id} value={classItem.id}>{classItem.name}</SelectItem>
+                <SelectItem value={classItem.name}>
+                  {classItem.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

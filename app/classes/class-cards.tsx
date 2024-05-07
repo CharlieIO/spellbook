@@ -63,8 +63,8 @@ export function ClassCards() {
 
   return (
     <>
-      <section className="w-full py-8 md:py-16 lg:py-20">
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6">
+      <section className="w-full py-4 md:py-8 lg:py-10">
+        <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-4 md:px-6">
           {classes.length === 0 && isLoading ? (
             Array.from({ length: cardsPerPage }, (_, index) => <ClassCard key={index} isLoading={true} />)
           ) : (
@@ -75,11 +75,11 @@ export function ClassCards() {
         </div>
       </section>
       {totalPages > 1 && (
-        <div className="container mx-auto mt-4 px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <CustomPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       )}
-      <div className="container mx-auto mt-8 px-4 md:px-6">
+      <div className="container mx-auto mt-10 px-4 md:px-6">
         <AddClassCard onSubmit={handleAddClass} />
       </div>
     </>

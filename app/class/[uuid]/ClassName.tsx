@@ -36,7 +36,7 @@ const ClassName: React.FC<ClassNameProps> = ({ uuid }) => {
   }, [uuid]);
 
   return (
-    <div className="font-bold text-3xl text-center my-8 py-2">
+    <div className="font-bold text-3xl text-center my-4 pt-6 pb-2">
       {name ? name : <div className="flex justify-center"><Skeleton style={{ width: '300px', height: '38px' }} /></div>}
     </div>
   );

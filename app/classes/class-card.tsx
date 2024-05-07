@@ -45,3 +45,4 @@ type ClassCardProps = {
       </Link>
     );
   };
+

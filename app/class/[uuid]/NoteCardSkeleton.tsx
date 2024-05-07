@@ -15,7 +15,7 @@ const NoteCardSkeleton: React.FC<NoteCardSkeletonProps> = ({ index }) => {
   const randomizedSkeletonWidths = skeletonWidths.sort(() => 0.5 - Math.random());
 
   return (
-    <div key={index} className="animate-pulse flex flex-col items-center justify-center h-48 bg-gray-200 rounded-lg shadow max-w-sm w-full">
+    <div key={index} className="animate-pulse flex flex-col items-center justify-center h-52 bg-gray-200 rounded-lg shadow max-w-sm w-full">
       <div className="w-full h-full bg-gray-300 rounded-lg p-4 space-y-2">
         {randomizedSkeletonWidths.map((width, idx) => (
           <Skeleton key={idx} className={`h-2 ${width}`} />

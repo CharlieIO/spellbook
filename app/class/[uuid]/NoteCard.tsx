@@ -26,7 +26,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const toggleFullScreen = () => setIsFullScreen(!isFullScreen);
-  const openDialog = () => setIsDialogOpen(true);
+  const openDialog = () => {
+    if (isFullScreen) {
+      setIsFullScreen(false);
+    }
+    setIsDialogOpen(true);
+  };
   const closeDialog = () => setIsDialogOpen(false);
   const handleDelete = () => {
     onDelete();
@@ -75,19 +80,22 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
     <Card className="max-w-sm w-full">
       <CardContent className="p-0">
         {isFullScreen ? createPortal(<div style={fullScreenStyle}>{imageContainer}</div>, document.body) : imageContainer}
-        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <AlertDialogPortal>
-            <AlertDialogOverlay />
-            <AlertDialogContent>
-              <AlertDialogTitle>Delete Note</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this note? This action cannot be undone.
-              </AlertDialogDescription>
-              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-              <AlertDialogCancel onClick={closeDialog}>Cancel</AlertDialogCancel>
-            </AlertDialogContent>
-          </AlertDialogPortal>
-        </AlertDialog>
+        {createPortal(
+          <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <AlertDialogPortal>
+              <AlertDialogOverlay />
+              <AlertDialogContent>
+                <AlertDialogTitle>Delete Note</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this note? This action cannot be undone.
+                </AlertDialogDescription>
+                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                <AlertDialogCancel onClick={closeDialog}>Cancel</AlertDialogCancel>
+              </AlertDialogContent>
+            </AlertDialogPortal>
+          </AlertDialog>,
+          document.body
+        )}
       </CardContent>
     </Card>
   );

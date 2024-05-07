@@ -5,146 +5,42 @@
 */
 'use client'
 import { Button } from "@/components/ui/button"
-import { JSX, SVGProps, useState, useEffect } from "react"
+import { JSX, SVGProps, useState, useEffect, useCallback } from "react"
 import UploadImage from "./UploadImage";
 import NoteCard from "./NoteCard";
 import { CustomPagination } from "@/components/pagination"; // Import CustomPagination from the correct location
 import NoteCardSkeleton from "./NoteCardSkeleton";
+import { useImageFetcher } from "./hooks/useImageFetcher"; // Import useImageFetcher hook
+import { useFileUploader } from "./hooks/useFileUploader"; // Import useFileUploader hook
+import { useImageDeleter } from "./hooks/useImageDeleter"; // Import useImageDeleter hook
+import usePagination from "./hooks/usePagination"; // Import usePagination hook
 
 interface NoteManagementProps {
   classUuid: string;
 }
-
 export function NoteManagement({ classUuid }: NoteManagementProps) {
-  const [images, setImages] = useState<{url: string, key: string}[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0); // State to track total pages
-  const [isLoading, setIsLoading] = useState(false);
   const imagesPerPage = 4;
+  const { currentPage, setCurrentPage, handlePreviousPage, handleNextPage } = usePagination(1);
+  const { images, totalPages, isLoading, refetchImages } = useImageFetcher(classUuid, currentPage, imagesPerPage);
+  const handleUpload = useFileUploader(classUuid); // Use the custom hook for file uploading
+  const handleDelete = useImageDeleter(refetchImages); // Use the custom hook for image deletion
 
+  // Update the pagination hook with the total pages once they are fetched
   useEffect(() => {
-    setIsLoading(true); // Set loading to true before fetching images
-    fetchImages(currentPage, imagesPerPage);
-  }, [currentPage]);
+    setCurrentPage(1); 
+  }, [totalPages, setCurrentPage]);
 
-  async function fetchImages(page = 1, limit = imagesPerPage) {
-    try {
-      const response = await fetch(`/api/class/notes?classUuid=${classUuid}&page=${page}&limit=${limit}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch images');
-      }
-      const data = await response.json();
-      const formattedImages = data.images.map((img: {url: string, key: string}) => ({
-        url: img.url,
-        key: img.key
-      }));
-      setImages(formattedImages); // Assuming the API returns an object with an 'images' array containing URLs and keys
-      setTotalPages(data.totalPages); // Assuming the API returns the total number of pages
-    } catch (error) {
-      console.error('Error fetching images:', error);
-    } finally {
-      setIsLoading(false);
+  const enhancedHandleUpload = useCallback(async (files: FileList | null) => {
+    if (files) {
+      await handleUpload(files);
+      refetchImages(); // Refresh images after upload
     }
-  }
-
-  const handleUpload = async (files: FileList | null) => {
-    if (files && classUuid) {
-      const fileNames = Array.from(files).map(file => file.name);
-      try {
-        const presignedUrls = await fetchPresignedUrls(fileNames, classUuid);
-        await uploadFilesToSignedUrls(files, presignedUrls);
-        console.log('All files uploaded successfully');
-        fetchImages(currentPage, imagesPerPage); // Refresh images after upload
-      } catch (error) {
-        console.error('Error during file upload:', error);
-      }
-    } else {
-      console.error('No files to upload or class UUID is missing');
-    }
-  };
-
-  async function fetchPresignedUrls(fileNames: string[], classUuid: string) {
-    const response = await fetch(`/api/class/notes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        classUuid: classUuid,
-        numberOfFiles: fileNames.length
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch presigned URLs');
-    }
-
-    const jsonResponse = await response.json();
-    if (!jsonResponse || !Array.isArray(jsonResponse)) {
-      throw new Error('Invalid response structure');
-    }
-
-    const presignedFiles = jsonResponse.map((file: { presignedUrl: any; fileKey: any; }) => ({
-      presignedUrl: file.presignedUrl,
-      fileKey: file.fileKey
-    }));
-    return presignedFiles;
-  }
-
-  async function uploadFilesToSignedUrls(files: FileList, presignedUrls: { presignedUrl: string; fileKey: string }[]) {
-    await Promise.all(presignedUrls.map(async (presignedUrl, index) => {
-      const file = files[index];
-      const uploadResponse = await fetch(presignedUrl.presignedUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type
-        },
-        body: file
-      });
-      if (!uploadResponse.ok) {
-        throw new Error(`Failed to upload file: ${file.name}`);
-      }
-
-      console.log(`File uploaded successfully: ${presignedUrl.fileKey}`);
-    }));
-  }
-
-  const handleDelete = async (imageKey: string) => {
-    try {
-      const response = await fetch(`/api/class/notes`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ imageKey })
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete image');
-      }
-      setImages(currentImages => currentImages.filter(image => image.key !== imageKey));
-      console.log(`Image deleted successfully: ${imageKey}`);
-    } catch (error) {
-      console.error('Error deleting image:', error);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    setCurrentPage(currentPage => Math.max(1, currentPage - 1));
-  };
-
-  const handleNextPage = () => {
-    setCurrentPage(currentPage => currentPage + 1);
-  };
+  }, [handleUpload, refetchImages]);
 
   return (
     <main className="flex flex-col items-center justify-center w-full h-full p-4 md:p-6 lg:p-8">
       <div className="max-w-3xl w-full">
-        <UploadImage onUpload={handleUpload} />
+        <UploadImage onUpload={enhancedHandleUpload} />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {isLoading ? (
             Array.from({ length: imagesPerPage }, (_, index) => (
@@ -186,4 +82,5 @@ function TrashIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
 
