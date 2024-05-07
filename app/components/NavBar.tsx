@@ -8,22 +8,17 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import classNames from 'classnames'
+import { ModeToggle } from "@/components/darkmodeToggle"
 
 export default function NavBar() {
   return (
     <header className="flex h-16 w-full items-center justify-between px-4 md:px-6 border-b">
+      <a href="/home" className="flex items-center gap-2">
+        <BookIcon className="h-6 w-6" />
+        <span className="text-lg font-semibold hidden sm:block">Spellbook</span>
+      </a>
       <NavigationMenu>
         <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuLink 
-              href="/home"
-              className={classNames(navigationMenuTriggerStyle(), "flex items-center gap-2 text-lg font-semibold")}
-            >
-              <BookIcon className="h-6 w-6" />
-              <span>Spellbook</span>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink href="/classes" className={navigationMenuTriggerStyle()}>
               My Classes
@@ -42,7 +37,8 @@ export default function NavBar() {
         </NavigationMenuList>
       </NavigationMenu>
 
-      <div>
+      <div className="flex items-center gap-4">
+        <ModeToggle />
         <ClerkLoaded>
           <UserButton />
         </ClerkLoaded>
