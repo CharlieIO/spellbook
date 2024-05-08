@@ -74,11 +74,13 @@ export function ClassCards() {
           )}
         </div>
       </section>
-      {totalPages > 1 && (
-        <div className="container mx-auto px-4 md:px-6">
-          <CustomPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      <div className="container mx-auto px-4 md:px-6">
+        <div style={{ minHeight: '40px' }}> {/* Fixed minimum height to prevent layout shift */}
+          {totalPages > 1 && (
+            <CustomPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          )}
         </div>
-      )}
+      </div>
       <div className="container mx-auto mt-10 px-4 md:px-6">
         <AddClassCard onSubmit={handleAddClass} />
       </div>

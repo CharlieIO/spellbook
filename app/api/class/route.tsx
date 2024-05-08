@@ -1,10 +1,11 @@
 import { auth } from '@clerk/nextjs';
-import { createClerkSupabaseClient } from 'lib/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
+import { provideDatastoreService } from '@/services/InstanceProvider';
+import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
 
 export async function GET(request: NextRequest) {
-  const client = await createClerkSupabaseClient();
   const { userId } = auth();
+  const datastoreService: IDatastoreAccessService = provideDatastoreService();
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,11 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Class UUID is required' }, { status: 400 });
   }
 
-  const { data, error } = await client
-    .from('classes')
-    .select('*')
-    .match({ uuid: classUuid, user_id: userId })
-    .single();
+  const { data, error } = await datastoreService.fetchClass(userId, classUuid);
 
   if (error) {
     console.error('Error fetching class:', error);

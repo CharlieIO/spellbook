@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
 
   let query = client
     .from('classes')
-    .select('*', { count: 'exact' })
+    .select(`
+      *,
+      class_descriptions (description)
+    `, { count: 'exact' })
     .match({ user_id: userId })
     .order('created_at', { ascending: true });
 
@@ -59,5 +62,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch classes' }, { status: 500 });
   }
 
-  return NextResponse.json({ data, total: count });
+  const classesWithDescription = data.map((classItem: any) => ({
+    ...classItem,
+    description: classItem.class_descriptions.length > 0 ? classItem.class_descriptions[0].description : null,
+  }));
+
+  return NextResponse.json({ data: classesWithDescription, total: count });
 }

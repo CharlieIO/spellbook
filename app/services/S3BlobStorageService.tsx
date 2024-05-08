@@ -1,16 +1,16 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
+import { IBlobStorageService } from '@/interfaces/IBlobStorageService';
 
-export class S3BlobStorageService {
+export class S3BlobStorageService implements IBlobStorageService {
     private s3Client: S3Client;
-
     constructor(s3Client: S3Client) {
         this.s3Client = s3Client;
     }
 
     async generateSignedUrl(fileKey: string): Promise<string> {
-        const bucketName = process.env.S3_BUCKET_NAME;
+        const bucketName = process.env.AWS_S3_IMAGESTORE_BUCKET_NAME;
 
         const command = new PutObjectCommand({
             Bucket: bucketName,
@@ -31,7 +31,7 @@ export class S3BlobStorageService {
      * @returns A promise that resolves with the signed URL as a string.
      */
     async getSignedUrlForDisplay(fileKey: string): Promise<string> {
-        const bucketName = process.env.S3_BUCKET_NAME;
+        const bucketName = process.env.AWS_S3_IMAGESTORE_BUCKET_NAME;
 
         const command = new GetObjectCommand({
             Bucket: bucketName,
@@ -51,13 +51,37 @@ export class S3BlobStorageService {
     }
 
     /**
+     * Retrieves text content from a file in the S3 bucket.
+     * 
+     * @param fileKey The key of the file to retrieve text from in the S3 bucket.
+     * @returns A promise that resolves with the text content of the file.
+     */
+    async getTextFromFile(fileKey: string): Promise<string> {
+        const bucketName = process.env.AWS_S3_IMAGESTORE_OCR_BUCKET_NAME;
+
+        const command = new GetObjectCommand({
+            Bucket: bucketName,
+            Key: fileKey,
+        });
+
+        try {
+            const { Body } = await this.s3Client.send(command);
+            const text = await this.streamToBuffer(Body as Readable);
+            return text.toString('utf-8');
+        } catch (error) {
+            console.error(`Failed to retrieve text from file with key ${fileKey} from bucket ${bucketName}:`, error);
+            throw new Error(`Failed to retrieve text from file with key ${fileKey} from bucket ${bucketName}`);
+        }
+    }
+
+    /**
      * Deletes a file from the S3 bucket.
      * 
      * @param fileKey The key of the file to delete in the S3 bucket.
      * @returns A promise that resolves when the file has been successfully deleted.
      */
     async deleteFile(fileKey: string): Promise<void> {
-        const bucketName = process.env.S3_BUCKET_NAME;
+        const bucketName = process.env.AWS_S3_IMAGESTORE_BUCKET_NAME;
 
         const command = new DeleteObjectCommand({
             Bucket: bucketName,

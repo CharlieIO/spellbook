@@ -47,9 +47,7 @@ const Description: React.FC<DescriptionProps> = ({ uuid }) => {
   }
 
   return (
-    <div className="text-center max-w-3xl mx-auto">
-      <p className="italic">{description}</p>
-    </div>
+      <p>{description}</p>
   );
 };
 

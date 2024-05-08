@@ -11,8 +11,9 @@ import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@
 import { Button } from "@/components/ui/button";
 
 type ClassItem = {
-  id: string;
+  uuid: string;
   name: string;
+  created_at: string;
 };
 
 export function QuizSelectionCard() {
@@ -28,12 +29,15 @@ export function QuizSelectionCard() {
           throw new Error('Failed to fetch classes');
         }
         const jsonResponse = await response.json();
-        // Adjusted to correctly handle the data structure returned by the GET request in route.tsx
         if (jsonResponse.data && Array.isArray(jsonResponse.data)) {
-          setClasses(jsonResponse.data.map((item: { id: string; name: string }) => ({
-            id: item.id,
-            name: item.name
-          })));
+          const sortedClasses = jsonResponse.data
+            .map((item: { uuid: string; name: string; created_at: string }) => ({
+              uuid: item.uuid,
+              name: item.name,
+              created_at: item.created_at
+            }))
+            .sort((a: ClassItem, b: ClassItem) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          setClasses(sortedClasses);
         } else {
           throw new Error('Invalid data structure');
         }
@@ -62,8 +66,8 @@ export function QuizSelectionCard() {
               <SelectValue placeholder="Select a class" />
             </SelectTrigger>
             <SelectContent>
-              {classes.map((classItem) => (
-                <SelectItem value={classItem.name}>
+              {classes.map((classItem: ClassItem, index: number) => (
+                <SelectItem key={index} value={classItem.name}>
                   {classItem.name}
                 </SelectItem>
               ))}

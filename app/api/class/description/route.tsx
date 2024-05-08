@@ -1,53 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs';
-import { createClerkSupabaseClient } from 'lib/supabaseClient';
-import { getGroqClient } from 'lib/groqClient';
+import { ILlmService } from '@/interfaces/ILlmService';
+import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
+import { provideDatastoreService, provideLlmService } from '@/services/InstanceProvider';
 
 async function fetchClassId(request: NextRequest): Promise<string> {
   const requestData = await request.json();
   return requestData.classId;
-}
-
-async function fetchExistingDescription(client: any, classId: string) {
-  return await client
-    .from('class_descriptions')
-    .select('description')
-    .match({ class_id: classId })
-    .order('description', { ascending: true });
-}
-
-async function fetchClassName(client: any, classId: string) {
-  return await client
-    .from('classes')
-    .select('name')
-    .match({ uuid: classId })
-    .single();
-}
-
-async function generateDescription(groqClient: any, className: string) {
-  return await groqClient.query(`Generate a short description for a class named ${className}`);
-}
-
-async function saveNewDescription(client: any, classId: string, newDescription: string) {
-  return await client
-    .from('class_descriptions')
-    .insert([
-      { class_id: classId, description: newDescription }
-    ]);
-}
-
-async function initializeGroqIfNeeded(className: string) {
-  if (!className) return null;
-  return getGroqClient(
-    "Generate a class description based on the class name. " +
-    "Only respond with the description, nothing else. " +
-    "Everything you say will be shown. " +
-    "Do not put your response in quotes. " +
-    "Make sure to keep your response short and concise. " +
-    "Use at most 10 words." +
-    "Do not use the word 'class' in the description." +
-    "If the class name seems like gibberish or is otherwise unrelated to a real class, return a funny description."
-  );
 }
 
 export async function POST(request: NextRequest) {
@@ -59,7 +18,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const client = await createClerkSupabaseClient();
+  const datastoreService: IDatastoreAccessService = provideDatastoreService();
+  const llmService: ILlmService = provideLlmService();
   const classId = await fetchClassId(request);
   console.log(`Received class ID: ${classId}`);
 
@@ -69,50 +29,43 @@ export async function POST(request: NextRequest) {
   }
 
   // Check if description already exists
-  const { data: existingData, error: existingError } = await fetchExistingDescription(client, classId);
+  const { descriptions: existingDescriptions, error: existingError } = await datastoreService.fetchDescriptions(classId);
 
   if (existingError) {
     console.error('Error fetching existing description:', existingError);
     return NextResponse.json({ error: 'Failed to fetch existing description' }, { status: 500 });
   }
 
-  if (existingData && existingData.length > 0) {
+  if (existingDescriptions && existingDescriptions.length > 0) {
     console.log('Description already exists, returning the first existing description');
-    return NextResponse.json({ description: existingData[0].description });
+    return NextResponse.json({ description: existingDescriptions[0] });
   }
 
   // Fetch class name and generate description if not exists
-  const { data: classData, error: classError } = await fetchClassName(client, classId);
+  const { className, error: classError } = await datastoreService.fetchClassName(classId);
 
-  if (classError || !classData) {
+  if (classError || !className) {
     console.error('Error fetching class:', classError);
     return NextResponse.json({ error: 'Class not found' }, { status: 404 });
   }
-  const className = classData.name;
   console.log(`Fetched class name: ${className}`);
 
-  const groqClient = await initializeGroqIfNeeded(className);
-  if (!groqClient) {
-    console.error('Groq client is not initialized');
-    return NextResponse.json({ error: 'Groq client is not available' }, { status: 500 });
+  try {
+    const description = await llmService.generateDescriptionForClass(className);
+    console.log(`Generated new description: ${description}`);
+
+    // Save the new description to the database
+    const { error: saveError } = await datastoreService.insertDescription(classId, description);
+
+    if (saveError) {
+      console.error('Error saving new description:', saveError);
+      return NextResponse.json({ error: 'Failed to save description' }, { status: 500 });
+    }
+
+    console.log('Successfully saved new description');
+    return NextResponse.json({ description: description });
+  } catch (error) {
+    console.error('Error generating or saving description:', error);
+    return NextResponse.json({ error: 'Failed to generate or save description' }, { status: 500 });
   }
-  const groqResponse = await generateDescription(groqClient, className);
-
-  if (!groqResponse || (groqResponse as any).error) {
-    console.error('Error generating description with Groq:', (groqResponse as any).error);
-    return NextResponse.json({ error: 'Failed to generate description' }, { status: 500 });
-  }
-  const newDescription = groqResponse.choices[0].message.content;
-  console.log(`Generated new description: ${newDescription}`);
-
-  // Save the new description to the database
-  const { error: saveError } = await saveNewDescription(client, classId, newDescription);
-
-  if (saveError) {
-    console.error('Error saving new description:', saveError);
-    return NextResponse.json({ error: 'Failed to save description' }, { status: 500 });
-  }
-
-  console.log('Successfully saved new description');
-  return NextResponse.json({ description: newDescription });
 }

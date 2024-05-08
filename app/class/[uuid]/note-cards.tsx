@@ -4,12 +4,11 @@
 * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
 */
 'use client'
-import { Button } from "@/components/ui/button"
-import { JSX, SVGProps, useState, useEffect, useCallback } from "react"
+import { JSX, SVGProps, useEffect, useCallback } from "react"
 import UploadImage from "./UploadImage";
-import NoteCard from "./NoteCard";
+import NoteCard from "./note-card";
 import { CustomPagination } from "@/components/pagination"; // Import CustomPagination from the correct location
-import NoteCardSkeleton from "./NoteCardSkeleton";
+import NoteCardSkeleton from "./note-card-skeleton";
 import { useImageFetcher } from "./hooks/useImageFetcher"; // Import useImageFetcher hook
 import { useFileUploader } from "./hooks/useFileUploader"; // Import useFileUploader hook
 import { useImageDeleter } from "./hooks/useImageDeleter"; // Import useImageDeleter hook
@@ -20,7 +19,7 @@ interface NoteManagementProps {
 }
 export function NoteManagement({ classUuid }: NoteManagementProps) {
   const imagesPerPage = 4;
-  const { currentPage, setCurrentPage, handlePreviousPage, handleNextPage } = usePagination(1);
+  const { currentPage, setCurrentPage } = usePagination(1);
   const { images, totalPages, isLoading, refetchImages } = useImageFetcher(classUuid, currentPage, imagesPerPage);
   const handleUpload = useFileUploader(classUuid); // Use the custom hook for file uploading
   const handleDelete = useImageDeleter(refetchImages); // Use the custom hook for image deletion

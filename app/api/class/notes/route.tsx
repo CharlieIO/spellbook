@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClerkSupabaseClient } from '@/lib/supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 import { provideBlobStorageService } from '@/services/InstanceProvider';
+import { provideDatastoreService } from '@/services/InstanceProvider';
 import { auth } from '@clerk/nextjs';
 
 export async function POST(req: NextRequest) {
     const blobStorageService = provideBlobStorageService();
-    const supabaseClient = await createClerkSupabaseClient();
+    const datastoreService = provideDatastoreService();
     let body;
 
     const { userId } = auth();
@@ -44,12 +44,7 @@ export async function POST(req: NextRequest) {
             }
 
             // Insert record into the database
-            const { data, error } = await supabaseClient.from('notes').insert({
-                user_id: userId,
-                class_uuid: classUuid,
-                blob_key: fileKey,
-                url: presignedUrl
-            });
+            const { data, error } = await datastoreService.insertNote(userId, classUuid, fileKey, presignedUrl);
 
             if (error) {
                 console.error('DB Insert Error:', error);
@@ -68,8 +63,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    console.log('Initializing supabase client and blob storage service');
-    const supabaseClient = await createClerkSupabaseClient();
+    console.log('Initializing datastore and blob storage service');
+    const datastoreService = provideDatastoreService();
     const blobStorageService = provideBlobStorageService();
     console.log('Authenticating user');
     const { userId } = auth();
@@ -77,7 +72,6 @@ export async function GET(req: NextRequest) {
     const classUuid = url.searchParams.get('classUuid');
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-    const offset = (page - 1) * limit;
 
     console.log(`Received parameters: userId=${userId}, classUuid=${classUuid}, page=${page}, limit=${limit}`);
 
@@ -88,20 +82,10 @@ export async function GET(req: NextRequest) {
 
     try {
         console.log('Fetching notes from database');
-        const { count } = await supabaseClient
-            .from('notes')
-            .select('id, blob_key', { count: 'exact' })
-            .match({ user_id: userId, class_uuid: classUuid });
+        const { data, error, count } = await datastoreService.fetchNotes(userId, classUuid, page, limit);
 
         // Ensure count is not null before calculating totalPages
         const totalPages = count ? Math.ceil(count / limit) : 0;
-
-        const { data, error } = await supabaseClient
-            .from('notes')
-            .select('id, blob_key')
-            .match({ user_id: userId, class_uuid: classUuid })
-            .order('created_at', { ascending: true })
-            .range(offset, offset + limit - 1);
 
         console.log('Fetched notes data:', data);
 
@@ -109,9 +93,8 @@ export async function GET(req: NextRequest) {
             console.error('Error fetching notes:', error);
             return new NextResponse(JSON.stringify({ error: 'Failed to fetch notes' }), { status: 500 });
         }
-
         console.log('Notes fetched successfully, processing images');
-        const images = await Promise.all(data.map(async note => {
+        const images = await Promise.all(data.map(async (note: { id: string; blob_key: string }) => {
             try {
                 console.log(`Fetching signed URL for display for note id=${note.id}`);
                 const signedUrl = await blobStorageService.getSignedUrlForDisplay(note.blob_key);
@@ -131,7 +114,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const supabaseClient = await createClerkSupabaseClient();
+    const datastoreService = provideDatastoreService();
     const { userId } = auth();
     const blobStorageService = provideBlobStorageService(); // Assuming BlobStorageService is imported and instantiated correctly
 
@@ -156,10 +139,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-        const { error: dbError } = await supabaseClient
-            .from('notes')
-            .delete()
-            .match({ blob_key: imageKey, user_id: userId });
+        const { error: dbError } = await datastoreService.deleteNote(userId, imageKey);
 
         if (dbError) {
             console.error('DB Delete Error:', dbError);

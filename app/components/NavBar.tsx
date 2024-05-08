@@ -1,6 +1,6 @@
 'use client'
 import { JSX, SVGProps } from "react"
-import { UserButton, ClerkLoading, ClerkLoaded } from "@clerk/nextjs"
+import { UserButton, ClerkLoaded, ClerkLoading } from "@clerk/nextjs"
 import { 
   NavigationMenu,
   NavigationMenuList,
@@ -9,6 +9,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { ModeToggle } from "@/components/darkmodeToggle"
+import { Skeleton } from "@/components/ui/skeleton"
+import UserButtonComponent from "./userbutton"
 
 export default function NavBar() {
   return (
@@ -17,37 +19,29 @@ export default function NavBar() {
         <BookIcon className="h-6 w-6" />
         <span className="text-lg font-semibold hidden sm:block">Spellbook</span>
       </a>
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/classes" className={navigationMenuTriggerStyle()}>
-              My Classes
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="#" className={navigationMenuTriggerStyle()}>
-              Insights
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/quizzes" className={navigationMenuTriggerStyle()}>
-              Practice Quizzes
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-
-      <div className="flex items-center gap-4">
-        <ModeToggle />
-        <ClerkLoaded>
-          <UserButton />
-        </ClerkLoaded>
-        <ClerkLoading>
-          <div className="animate-pulse flex space-x-4">
-            <div className="rounded-full bg-gray-300 h-8 w-8"></div>
-          </div>
-        </ClerkLoading>
+      <div className="flex justify-center w-full">
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/classes" className={navigationMenuTriggerStyle()}>
+                My Classes
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="#" className={navigationMenuTriggerStyle()}>
+                Insights
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/quizzes" className={navigationMenuTriggerStyle()}>
+                Practice Quizzes
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
       </div>
+
+      <UserButtonComponent />
     </header>
   )
 }
