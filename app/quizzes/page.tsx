@@ -55,7 +55,7 @@ export default function QuizPage() {
         )}
         {reviewMode && score !== null && (
           <div className="text-center mt-4 mb-10">
-            <Alert variant={score >= 75 ? "default" : score >= 50 ? "default" : "destructive"}>
+            <Alert variant="default">
               <AlertTitle>{score >= 75 ? "Excellent Performance!" : score >= 50 ? "Good Effort!" : "Needs Improvement"}</AlertTitle>
               <AlertDescription>
                 {score >= 75 ? `You scored ${score}%. Outstanding result!` :
