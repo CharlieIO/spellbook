@@ -28,11 +28,21 @@ export default function Home() {
           <p className="py-6 text-base lg:text-lg 2xl:text-xl">
             Turn your notes into flashcards, study guides, quizzes, and more. Magically.
           </p>
-          <Link href="/login">
-            <Button className="mb-8 md:mb-12 sm:mb-10 lg:mb-0">
-              Log in
-            </Button>
-          </Link>
+          <div className="flex gap-3">
+            <Link href="/login">
+              <Button className="mb-8 md:mb-12 sm:mb-10 lg:mb-0">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button 
+                className="mb-8 md:mb-12 sm:mb-10 lg:mb-0"
+                variant="outline"
+              >
+                Sign up
+              </Button>
+            </Link>
+          </div>
         </div>
         <div className="relative w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl 2xl:max-w-3xl mx-4 lg:mx-8 2xl:mx-12" style={{ height: 'auto' }}>
           <span className="absolute -inset-4 blur-3xl filter bg-gradient-to-r from-primary to-secondary opacity-30 rounded-lg z-0"></span>
