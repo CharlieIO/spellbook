@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { ThemeProvider } from "@/services/ThemeProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,7 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    
     <ClerkProvider>
+      <SpeedInsights />
       <html lang="en" suppressHydrationWarning>
         <head />
         <body className={inter.className}>
