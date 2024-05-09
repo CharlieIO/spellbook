@@ -2,7 +2,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import witch from '/public/witch2.webp';
 import { Button } from '@/components/ui/button';
-import { SignInButton, SignUpButton } from '@clerk/nextjs';
 /**
  * v0 by Vercel.
  * @see https://v0.dev/t/4lZsnpPcLx1
@@ -30,8 +29,19 @@ export default function Home() {
             Turn your notes into flashcards, study guides, quizzes, and more. Magically.
           </p>
           <div className="flex gap-3">
-            <SignInButton afterSignInUrl="/home" />
-            <SignUpButton afterSignUpUrl="/home" />
+            <Link href="/login">
+              <Button className="mb-8 md:mb-12 sm:mb-10 lg:mb-0">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button 
+                className="mb-8 md:mb-12 sm:mb-10 lg:mb-0"
+                variant="outline"
+              >
+                Sign up
+              </Button>
+            </Link>
           </div>
         </div>
         <div className="relative w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl 2xl:max-w-3xl mx-4 lg:mx-8 2xl:mx-12" style={{ height: 'auto' }}>
