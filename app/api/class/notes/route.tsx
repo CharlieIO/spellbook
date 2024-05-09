@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { provideBlobStorageService } from '@/services/InstanceProvider';
 import { provideDatastoreService } from '@/services/InstanceProvider';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 export async function POST(req: NextRequest) {
     const blobStorageService = provideBlobStorageService();

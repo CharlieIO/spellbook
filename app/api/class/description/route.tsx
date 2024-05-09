@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { ILlmService } from '@/interfaces/ILlmService';
 import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
 import { provideDatastoreService, provideSmallLlmService } from '@/services/InstanceProvider';
