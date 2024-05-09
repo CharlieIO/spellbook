@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs';
 import { ILlmService } from '@/interfaces/ILlmService';
 import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
-import { provideDatastoreService, provideLlmService } from '@/services/InstanceProvider';
+import { provideDatastoreService, provideSmallLlmService } from '@/services/InstanceProvider';
 
 async function fetchClassId(request: NextRequest): Promise<string> {
   const requestData = await request.json();
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   }
 
   const datastoreService: IDatastoreAccessService = provideDatastoreService();
-  const llmService: ILlmService = provideLlmService();
+  const llmService: ILlmService = provideSmallLlmService();
   const classId = await fetchClassId(request);
   console.log(`Received class ID: ${classId}`);
 

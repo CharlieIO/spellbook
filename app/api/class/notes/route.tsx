@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
                 return null; // Return null in case of error fetching signed URL
             }
         }));
-
+        console.log('totalPages:', totalPages);
         console.log('All signed URLs processed successfully');
         return new NextResponse(JSON.stringify({ images: images.filter(image => image !== null), totalPages: totalPages }), { status: 200 });
     } catch (error) {

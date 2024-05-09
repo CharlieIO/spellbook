@@ -61,7 +61,7 @@ export class S3BlobStorageService implements IBlobStorageService {
 
         const command = new GetObjectCommand({
             Bucket: bucketName,
-            Key: fileKey,
+            Key: "processed/" + fileKey,
         });
 
         try {

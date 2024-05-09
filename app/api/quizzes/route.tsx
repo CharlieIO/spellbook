@@ -1,12 +1,14 @@
 import { auth } from '@clerk/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
-import { getGroqClient } from 'lib/groqClient';
 import { provideBlobStorageService } from '@/services/InstanceProvider';
 import { provideDatastoreService } from '@/services/InstanceProvider';
+import { provideLargeLlmService } from '@/services/InstanceProvider'; // Import the LLM service provider
 import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
+import { ILlmService } from '@/interfaces/ILlmService'; // Import the LLM service interface
 
 export async function POST(request: NextRequest) {
   const datastoreService: IDatastoreAccessService = provideDatastoreService();
+  const llmService: ILlmService = provideLargeLlmService(); // Get the LLM service instance
   const { userId } = auth();
 
   if (!userId) {
@@ -15,6 +17,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
   const classUuid = body.classUuid;
+  const numQuestions = body.numQuestions || 5; // Default to 5 questions if not specified
 
   if (!classUuid) {
     return NextResponse.json({ error: 'Class UUID is required' }, { status: 400 });
@@ -28,15 +31,19 @@ export async function POST(request: NextRequest) {
   }
 
   const blobStorageService = provideBlobStorageService();
-  const fileKey = `notes/${classUuid}.json`;
+  const notesKeysResult = await datastoreService.fetchNoteKeysForClass(classUuid);
+  if (notesKeysResult.error) {
+    console.error('Error fetching note keys:', notesKeysResult.error);
+    return NextResponse.json({ error: 'Failed to fetch note keys' }, { status: 500 });
+  }
+  const notesKeys = notesKeysResult.keys;
+  const notesPromises = notesKeys.map((key: string) => blobStorageService.getTextFromFile(key));
+  const notesTexts = await Promise.all(notesPromises);
+  console.log(notesTexts);
 
   try {
-    const notesText = await blobStorageService.getSignedUrlForDisplay(fileKey);
-    const notes = JSON.parse(notesText);
-
-    const groqClient = getGroqClient("Generate quiz from class notes");
-    const quiz = await generateQuizFromNotes(groqClient, notes);
-
+    const quiz = await generateQuizFromNotes(llmService, notesTexts, numQuestions);
+    console.log(quiz);
     return NextResponse.json({ quiz });
   } catch (error) {
     console.error('Error accessing blob storage:', error);
@@ -44,13 +51,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateQuizFromNotes(groqClient: any, notes: any[]) {
-  const groqQuery = "Generate a quiz based on these notes";
+async function generateQuizFromNotes(llmService: ILlmService, notes: any[], numQuestions: number) {
+  if (!notes || notes.length === 0) {
+    throw new Error('Notes are required to generate a quiz');
+  }
+
   try {
-    const response = await groqClient.query(groqQuery, { "response_format": {"type": "json_object"} });
-    return response.data;
+    const quizJson = await llmService.generateQuizJsonFromNotes(notes, numQuestions);
+    return JSON.parse(quizJson);
   } catch (error) {
-    console.error('Error generating quiz with Groq:', error);
+    console.error('Error generating quiz with LLM:', error);
     throw new Error('Failed to generate quiz');
   }
 }

@@ -1,13 +1,13 @@
 import { ILlmService } from '@/interfaces/ILlmService';
-import { getGroqClient } from '@/lib/groqClient';
+import { getOpenAiClient } from '@/lib/openAiClient';
 
-export class GroqLlmService implements ILlmService {
+export class OpenAiLlmService implements ILlmService {
   async generateDescriptionForClass(className: string): Promise<string> {
     if (!className) {
       throw new Error('Class name is required');
     }
 
-    const groqClient = await getGroqClient(
+    const openAiClient = await getOpenAiClient(
       "Generate a class description based on the class name. " +
       "Only respond with the description, nothing else. " +
       "Do not put your response in quotes. " +
@@ -17,15 +17,20 @@ export class GroqLlmService implements ILlmService {
       "If the class name seems like gibberish or is otherwise unrelated to a real class, return a funny description."
     );
 
-    if (!groqClient) {
-      throw new Error('Groq client initialization failed');
+    if (!openAiClient) {
+      throw new Error('OpenAI client initialization failed');
     }
-    const response = await groqClient.query(`Generate a short description for a class named ${className}`);
+    const response = await openAiClient.query(`Generate a short description for a class named ${className}`);
     if (!response || (response as any).error) {
       throw new Error('Failed to generate description');
     }
 
-    return response.choices[0].message.content;
+    const description = response.choices[0].message.content;
+    if (description === null) {
+      throw new Error('Description is null');
+    }
+
+    return description;
   }
 
   async generateQuizJsonFromNotes(notes: string[], numQuestions: number): Promise<string> {
@@ -35,10 +40,10 @@ export class GroqLlmService implements ILlmService {
 
     const concatenatedNotes = notes.join(' '); // Concatenate all notes into a single string
 
-    const groqClient = await getGroqClient(
+    const openAiClient = await getOpenAiClient(
       "Generate a quiz in JSON format based on the provided notes. " +
       "The quiz should include questions and multiple-choice answers derived from the notes content." +
-      "The quiz should have at most " + numQuestions + " questions." +
+      "The quiz should have as many questions as possible" +
       "Only respond in the following format: \n" +
       "{\n" +
       "  \"questions\": [\n" +
@@ -53,17 +58,23 @@ export class GroqLlmService implements ILlmService {
       "Do not put your response in quotes."
     );
 
-    if (!groqClient) {
-      throw new Error('Groq client initialization failed');
+    if (!openAiClient) {
+      throw new Error('OpenAI client initialization failed');
     }
 
-    const response = await groqClient.query(`Generate a quiz JSON from the following notes: ${concatenatedNotes}`, {
-      "response_format": {"type": "json_object"}
+    const response = await openAiClient.query(`Please generate a quiz JSON with at least 4000 tokens from the following notes: ${concatenatedNotes}`, {
+      "response_format": {"type": "json_object"},
+      "max_tokens": 4096
     });
     if (!response || (response as any).error) {
       throw new Error('Failed to generate quiz JSON');
     }
 
-    return response.choices[0].message.content;
+    const quizJson = response.choices[0].message.content;
+    if (quizJson === null) {
+      throw new Error('Quiz JSON is null');
+    }
+
+    return quizJson;
   }
 }

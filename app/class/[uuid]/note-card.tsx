@@ -6,7 +6,6 @@ import { CSSProperties } from 'react';
 import Image from 'next/image';
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogAction,
   AlertDialogCancel,
@@ -57,9 +56,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
         alt="Note Image"
         className="w-full h-full object-contain cursor-pointer"
         src={imageSrc}
-        layout="fill"
-        objectFit="contain"
-        objectPosition="center"
+        fill
+        sizes="100vw"
+        style={{
+          objectFit: 'contain',
+          objectPosition: 'center',
+        }}
       />
       <Button
         className="absolute top-2 right-2 bg-gray-900 dark:bg-gray-50 text-gray-50 dark:text-gray-900"
@@ -123,4 +125,3 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default NoteCard;
-

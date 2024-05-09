@@ -32,14 +32,15 @@ export default function Home() {
         </div>
         <div className="relative w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl 2xl:max-w-3xl mx-4 lg:mx-8 2xl:mx-12">
           <span className="absolute -inset-4 blur-3xl filter bg-gradient-to-r from-primary to-secondary opacity-30 rounded-lg z-0"></span>
-          <img
+          <img  
             alt="A witch casts spells on notes."
             className="rounded-lg transition-all duration-500 ease-in-out w-full h-auto z-10 relative"
             src="/witch2.webp"
             style={{
               aspectRatio: "500/280",
               objectFit: "cover",
-            }} />
+            }}
+          />
         </div>
       </div>
     </div>

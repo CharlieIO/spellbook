@@ -23,6 +23,9 @@ function createGroqClient(systemPrompt: string) {
         model: "llama3-70b-8192",
         ...params
       });
+      console.log(systemPrompt);
+      console.log(groqQuery);
+      console.log(response);
       return response;
     } catch (error: any) {
       throw new Error(`Failed to fetch from Groq: ${error.message}`);

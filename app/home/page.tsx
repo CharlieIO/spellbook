@@ -1,5 +1,5 @@
 import React from 'react';
-import NavBar from '@/components/NavBar';
+import NavBar from '@/components/navbar';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 

@@ -5,6 +5,7 @@ import SupabaseDatastoreAccessService from './SupabaseDatastoreAccessService';
 import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
 import { GroqLlmService } from './GroqLlmService';
 import { ILlmService } from '@/interfaces/ILlmService';
+import { OpenAiLlmService } from './OpenAiLlmService';
 
 /**
  * Provides an instance of the S3BlobStorageService which implements the IBlobStorageService interface.
@@ -35,8 +36,23 @@ function provideDatastoreService(): IDatastoreAccessService {
  * 
  * @returns {ILlmService} An instance of a class that implements the ILlmService interface.
  */
-function provideLlmService(): ILlmService {
+function provideLargeLlmService(): ILlmService {
+  return new OpenAiLlmService();
+}
+
+/**
+ * Provides an instance of the GroqLlmService which implements the ILlmService interface.
+ * This function abstracts the creation and configuration of the GroqLlmService,
+ * allowing other parts of the application to use Groq's language model services without knowing the details of the Groq implementation.
+ * This particular service is configured to use a lightweight, faster model suitable for small and less complex requests.
+ * 
+ * @returns {ILlmService} An instance of a class that implements the ILlmService interface.
+ */
+function provideSmallLlmService(): ILlmService {
   return new GroqLlmService();
 }
 
-export { provideBlobStorageService, provideDatastoreService, provideLlmService };
+
+
+
+export { provideBlobStorageService, provideDatastoreService, provideLargeLlmService, provideSmallLlmService };

@@ -9,6 +9,7 @@ export interface IDatastoreAccessService {
     insertNote(userId: string, classUuid: string, fileKey: string, url: string): Promise<{ data: any, error: any }>;
     fetchNotes(userId: string, classUuid: string, page: number, limit: number): Promise<{ data: any, error: any, count: number }>;
     deleteNote(userId: string, imageKey: string): Promise<{ error: any }>;
+    fetchNoteKeysForClass(classUuid: string): Promise<{ keys: string[], error: any }>;
 
     // Description-related methods
     insertDescription(classId: string, description: string): Promise<{ data: any, error: any }>;

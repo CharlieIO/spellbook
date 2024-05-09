@@ -95,14 +95,19 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
     async fetchNotes(userId: string, classUuid: string, page: number, limit: number): Promise<{ data: any, error: any, count: number }> {
         const client = await createClerkSupabaseClient();
         try {
-            const { data, error, count } = await client
+            console.log('page:', page);
+            console.log('limit:', limit);
+            const { data, error } = await client
                 .from('notes')
-                .select('*')
+                .select('*', { count: 'exact' })
                 .match({ user_id: userId, class_uuid: classUuid })
                 .range((page - 1) * limit, page * limit - 1);
-            // Ensure count is always a number by providing a fallback value
-            const safeCount = count || 0;
-            return { data, error, count: safeCount };
+            const totalNotesCount = await client
+                .from('notes')
+                .select('*', { count: 'exact', head: true })
+                .match({ user_id: userId, class_uuid: classUuid });
+            const count = totalNotesCount.count || 0;
+            return { data, error, count };
         } catch (error) {
             console.error('Error fetching notes:', error);
             return { data: null, error, count: 0 };
@@ -152,6 +157,26 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
         } catch (error) {
             console.error('Error fetching descriptions:', error);
             return { descriptions: [], error };
+        }
+    }
+
+    async fetchNoteKeysForClass(classUuid: string): Promise<{ keys: string[], error: any }> {
+        const client = await createClerkSupabaseClient();
+        try {
+            const { data, error } = await client
+                .from('notes')
+                .select('blob_key')
+                .match({ class_uuid: classUuid });
+
+            if (error) {
+                return { keys: [], error };
+            }
+
+            const keys = data.map((item: { blob_key: string }) => item.blob_key);
+            return { keys, error: null };
+        } catch (error) {
+            console.error('Error fetching note keys for class:', error);
+            return { keys: [], error };
         }
     }
 }

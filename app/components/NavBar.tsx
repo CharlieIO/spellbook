@@ -1,6 +1,5 @@
 'use client'
 import { JSX, SVGProps } from "react"
-import { UserButton, ClerkLoaded, ClerkLoading } from "@clerk/nextjs"
 import { 
   NavigationMenu,
   NavigationMenuList,
@@ -8,8 +7,6 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { ModeToggle } from "@/components/darkmodeToggle"
-import { Skeleton } from "@/components/ui/skeleton"
 import UserButtonComponent from "./userbutton"
 
 export default function NavBar() {
@@ -29,7 +26,7 @@ export default function NavBar() {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink href="#" className={navigationMenuTriggerStyle()}>
-                Insights
+                <s>Insights</s>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>

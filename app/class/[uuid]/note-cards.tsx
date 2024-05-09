@@ -18,7 +18,7 @@ interface NoteManagementProps {
   classUuid: string;
 }
 export function NoteManagement({ classUuid }: NoteManagementProps) {
-  const imagesPerPage = 4;
+  const imagesPerPage = 8;
   const { currentPage, setCurrentPage } = usePagination(1);
   const { images, totalPages, isLoading, refetchImages } = useImageFetcher(classUuid, currentPage, imagesPerPage);
   const handleUpload = useFileUploader(classUuid); // Use the custom hook for file uploading

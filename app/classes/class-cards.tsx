@@ -16,7 +16,7 @@ export function ClassCards() {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true); // State to track loading status
   const cardsPerRow = 4; // Number of cards per row
-  const rowsPerPage = 2; // Number of full rows per page
+  const rowsPerPage = 1; // Number of full rows per page
   const cardsPerPage = cardsPerRow * rowsPerPage; // Total number of cards per page
 
   useEffect(() => {
@@ -87,3 +87,4 @@ export function ClassCards() {
     </>
   );
 }
+
