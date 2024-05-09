@@ -18,14 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    
     <ClerkProvider>
-      <SpeedInsights />
       <html lang="en" suppressHydrationWarning>
         <head />
         <body className={inter.className}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             {children}
+            <SpeedInsights /> 
           </ThemeProvider>
         </body>
       </html>
