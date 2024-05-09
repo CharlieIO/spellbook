@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import witch from '/public/witch2.webp';
 /**
  * v0 by Vercel.
  * @see https://v0.dev/t/4lZsnpPcLx1
@@ -30,14 +31,12 @@ export default function Home() {
             <Link href="/login" className="btn btn-primary mb-8 md:mb-12 sm:mb-10 lg:mb-0">Log in</Link>
           </div>
         </div>
-        <div className="relative w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl 2xl:max-w-3xl mx-4 lg:mx-8 2xl:mx-12">
+        <div className="relative w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl 2xl:max-w-3xl mx-4 lg:mx-8 2xl:mx-12" style={{ height: 'auto' }}>
           <span className="absolute -inset-4 blur-3xl filter bg-gradient-to-r from-primary to-secondary opacity-30 rounded-lg z-0"></span>
           <Image  
             alt="A witch casts spells on notes."
-            className="rounded-lg transition-all duration-500 ease-in-out w-full h-auto z-10 relative"
-            src="/witch2.webp"
-            layout="fill"
-            objectFit="cover"
+            className="rounded-lg transition-all duration-500 ease-in-out w-full h-full z-10 relative"
+            src={witch}
           />
         </div>
       </div>
