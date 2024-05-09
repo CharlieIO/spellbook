@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { provideDatastoreService } from '@/services/InstanceProvider';
 import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
