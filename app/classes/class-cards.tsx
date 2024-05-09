@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { CustomPagination } from "../components/pagination"
 import { ClassCard } from "./class-card";
 import { AddClassCard } from "./add-class-card"; // Assuming you have a component for adding new class cards
@@ -19,11 +19,7 @@ export function ClassCards() {
   const rowsPerPage = 1; // Number of full rows per page
   const cardsPerPage = cardsPerRow * rowsPerPage; // Total number of cards per page
 
-  useEffect(() => {
-    fetchClasses();
-  }, [currentPage]);
-
-  const fetchClasses = async () => {
+  const fetchClasses = useCallback(async () => {
     setIsLoading(true); // Set loading to true when fetch starts
     try {
       const response = await fetch(`/api/classes?page=${currentPage}&limit=${cardsPerPage}`);
@@ -36,7 +32,11 @@ export function ClassCards() {
     } finally {
       setIsLoading(false); // Set loading to false when fetch completes
     }
-  };
+  }, [currentPage, cardsPerPage]);
+
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
 
   const handleAddClass = async (name: string) => {
     console.log(`Adding class: ${name}`);
