@@ -51,7 +51,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
   };
 
   const imageContainer = (
-    <div className={isFullScreen ? "relative w-full h-full" : "relative w-full h-full min-h-[200px]"} onClick={toggleFullScreen}>
+    <div className={isFullScreen ? "relative w-full h-full" : "relative w-full h-full min-h-[200px] group"} onClick={toggleFullScreen}>
       <Image
         alt="Note Image"
         className="w-full h-full object-contain cursor-pointer"
@@ -64,7 +64,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
         }}
       />
       <Button
-        className="absolute top-2 right-2 bg-gray-900 dark:bg-gray-50 text-gray-50 dark:text-gray-900"
+        className="absolute top-2 right-2 bg-primary text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-100"
         size="icon"
         variant="ghost"
         onClick={(e) => {
