@@ -16,6 +16,7 @@ export function QuizSelectionCard() {
   const [isLoading, setIsLoading] = useState(true);
   const [numberOfQuestions, setNumberOfQuestions] = useState('5');
   const [selectedClassUuid, setSelectedClassUuid] = useState<string | null>(null);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export function QuizSelectionCard() {
 
   const handleQuizGeneration = async () => {
     if (selectedClassUuid && numberOfQuestions) {
+      setIsButtonDisabled(true);
       try {
         const response = await fetch('/api/quizzes', {
           method: 'POST',
@@ -67,6 +69,7 @@ export function QuizSelectionCard() {
         router.push(`/quiz/loading/${jobUuid}`);
       } catch (error) {
         console.error('Error generating quiz:', error);
+        setIsButtonDisabled(false);
       }
     }
   };
@@ -108,7 +111,7 @@ export function QuizSelectionCard() {
             </SelectContent>
           </Select>
         </div>
-        <Button className="w-full" onClick={handleQuizGeneration}>
+        <Button className="w-full" onClick={handleQuizGeneration} disabled={isButtonDisabled}>
           Generate Quiz
         </Button>
       </CardContent>

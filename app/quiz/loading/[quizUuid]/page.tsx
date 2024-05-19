@@ -70,7 +70,7 @@ const LoadingPage = ({ params }: { params: { quizUuid: string } }) => {
   useEffect(() => {
     const factInterval = setInterval(() => {
       setCurrentFactIndex((prevIndex) => (prevIndex + 1) % funFacts.length);
-    }, 20000); // Change fact every 20 seconds
+    }, 10000); // Change fact every 10 seconds
 
     return () => clearInterval(factInterval);
   }, []);
