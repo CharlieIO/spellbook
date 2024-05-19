@@ -83,7 +83,7 @@ export function QuizSelectionCard() {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="class">Class</Label>
-          <Select onValueChange={setSelectedClassUuid} disabled={classes.length === 0}>
+          <Select onValueChange={setSelectedClassUuid} disabled={classes.length === 0 || isButtonDisabled}>
             <SelectTrigger id="class" aria-label="Class">
               <SelectValue placeholder="Select a class" />
             </SelectTrigger>
@@ -98,7 +98,7 @@ export function QuizSelectionCard() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="number-of-questions">Number of Questions</Label>
-          <Select onValueChange={(value: string) => setNumberOfQuestions(value)}>
+          <Select onValueChange={(value: string) => setNumberOfQuestions(value)} disabled={isButtonDisabled}>
             <SelectTrigger id="number-of-questions" aria-label="Number of Questions">
               <SelectValue placeholder="Select number of questions" />
             </SelectTrigger>
