@@ -1,3 +1,4 @@
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 
@@ -15,13 +16,13 @@ const NoteCardSkeleton: React.FC<NoteCardSkeletonProps> = ({ index }) => {
   const randomizedSkeletonWidths = skeletonWidths.sort(() => 0.5 - Math.random());
 
   return (
-    <div key={index} className="animate-pulse flex flex-col items-center justify-center h-52 rounded-lg shadow max-w-sm w-full">
-      <div className="w-full h-full rounded-lg p-4 space-y-2">
+    <Card key={index} className="animate-pulse flex flex-col items-center justify-center h-52 max-w-sm w-full">
+      <CardContent className="w-full h-full p-4 space-y-2">
         {randomizedSkeletonWidths.map((width, idx) => (
           <Skeleton key={idx} className={`h-2 ${width}`} />
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

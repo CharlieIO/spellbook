@@ -28,19 +28,19 @@ export default function NavBar() {
           </SheetTrigger>
           <SheetContent className="flex flex-col items-center bg-background">
             <NavigationMenu>
-              <NavigationMenuList className="flex flex-col">
+              <NavigationMenuList className="flex flex-col space-y-4">
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/classes" className={`${navigationMenuTriggerStyle()} bg-background`}>
+                  <NavigationMenuLink href="/classes" className={`${navigationMenuTriggerStyle()} bg-background text-xl py-2`}>
                     My Classes
-                  </NavigationMenuLink>
+                  </NavigationMenuLink> 
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="#" className={`${navigationMenuTriggerStyle()} bg-background`}>
+                  <NavigationMenuLink href="#" className={`${navigationMenuTriggerStyle()} bg-background text-xl py-2`}>
                     <s>Insights</s>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/quizzes" className={`${navigationMenuTriggerStyle()} bg-background`}>
+                  <NavigationMenuLink href="/quizzes" className={`${navigationMenuTriggerStyle()} bg-background text-xl py-2`}>
                     Practice Quizzes
                   </NavigationMenuLink>
                 </NavigationMenuItem>
