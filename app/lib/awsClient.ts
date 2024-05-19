@@ -1,4 +1,5 @@
 import { S3 } from '@aws-sdk/client-s3';
+import { SQS } from '@aws-sdk/client-sqs';
 
 // Ensure environment variables are defined
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -17,4 +18,12 @@ const s3Client = new S3({
   region: region,
 });
 
-export { s3Client };
+const sqsClient = new SQS({
+  credentials: {
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
+  },
+  region: region,
+});
+
+export { s3Client, sqsClient };

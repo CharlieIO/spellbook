@@ -1,11 +1,13 @@
 import { S3BlobStorageService } from './S3BlobStorageService';
-import { s3Client } from '../lib/awsClient';
+import { s3Client, sqsClient } from '../lib/awsClient';
 import { IBlobStorageService } from '@/interfaces/IBlobStorageService'; // Corrected import statement
 import SupabaseDatastoreAccessService from './SupabaseDatastoreAccessService';
 import { IDatastoreAccessService } from '@/interfaces/IDatastoreAccessService';
 import { GroqLlmService } from './GroqLlmService';
 import { ILlmService } from '@/interfaces/ILlmService';
 import { OpenAiLlmService } from './OpenAiLlmService';
+import SqsQueueService from './SqsQueueService';
+import { IQueueService } from '@/interfaces/IQueueService';
 
 /**
  * Provides an instance of the S3BlobStorageService which implements the IBlobStorageService interface.
@@ -52,7 +54,15 @@ function provideSmallLlmService(): ILlmService {
   return new GroqLlmService();
 }
 
+/**
+ * Provides an instance of the SqsQueueService which implements the IQueueService interface.
+ * This function abstracts the creation and configuration of the SqsQueueService,
+ * allowing other parts of the application to use SQS queue services without knowing the details of the SQS implementation.
+ * 
+ * @returns {IQueueService} An instance of a class that implements the IQueueService interface.
+ */
+function provideQueueService(): IQueueService {
+  return new SqsQueueService();
+}
 
-
-
-export { provideBlobStorageService, provideDatastoreService, provideLargeLlmService, provideSmallLlmService };
+export { provideBlobStorageService, provideDatastoreService, provideLargeLlmService, provideSmallLlmService, provideQueueService };

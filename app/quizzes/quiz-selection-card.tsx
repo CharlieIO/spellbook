@@ -1,47 +1,22 @@
-'use client'
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { CardTitle, CardDescription, CardHeader, CardContent, Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/loadingspinner";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
-async function fetchQuiz(classUuid: string, numQuestions: string) {
-  try {
-    const response = await fetch('/api/quizzes', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ classUuid, numQuestions })
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const quiz = await response.json();
-    return quiz;
-  } catch (error) {
-    console.error('Failed to fetch quiz:', error);
-    return null;
-  }
-}
-
-type ClassItem = {
+interface ClassItem {
   uuid: string;
   name: string;
   created_at: string;
-};
+}
 
-type QuizSelectionCardProps = {
-  onQuizGenerated: (quizData: any) => void;
-};
-
-export function QuizSelectionCard({ onQuizGenerated }: QuizSelectionCardProps) {
+export function QuizSelectionCard() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [numberOfQuestions, setNumberOfQuestions] = useState('5');
   const [selectedClassUuid, setSelectedClassUuid] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchClasses() {
@@ -77,21 +52,24 @@ export function QuizSelectionCard({ onQuizGenerated }: QuizSelectionCardProps) {
 
   const handleQuizGeneration = async () => {
     if (selectedClassUuid && numberOfQuestions) {
-      setIsGeneratingQuiz(true);
-      const quizData = await fetchQuiz(selectedClassUuid, numberOfQuestions);
-      console.log(quizData);
-      onQuizGenerated(quizData.quiz);
+      try {
+        const response = await fetch('/api/quizzes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ classUuid: selectedClassUuid, numQuestions: numberOfQuestions })
+        });
+        if (!response.ok) {
+          throw new Error('Failed to enqueue quiz generation job');
+        }
+        const { jobUuid } = await response.json();
+        router.push(`/quiz/loading/${jobUuid}`);
+      } catch (error) {
+        console.error('Error generating quiz:', error);
+      }
     }
   };
-
-  if (isGeneratingQuiz) {
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <LoadingSpinner className="h-10 w-10 mb-4" />
-        <p className="text-lg">Generating quiz... This can take some time, please do not refresh the page.</p>
-      </div>
-    );
-  }
 
   return (
     <Card className="w-full max-w-md">
@@ -117,7 +95,7 @@ export function QuizSelectionCard({ onQuizGenerated }: QuizSelectionCardProps) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="number-of-questions">Number of Questions</Label>
-          <Select onValueChange={(value) => setNumberOfQuestions(value)}>
+          <Select onValueChange={(value: string) => setNumberOfQuestions(value)}>
             <SelectTrigger id="number-of-questions" aria-label="Number of Questions">
               <SelectValue placeholder="Select number of questions" />
             </SelectTrigger>
@@ -130,7 +108,9 @@ export function QuizSelectionCard({ onQuizGenerated }: QuizSelectionCardProps) {
             </SelectContent>
           </Select>
         </div>
-        <Button className="w-full" onClick={handleQuizGeneration}>Generate Quiz</Button>
+        <Button className="w-full" onClick={handleQuizGeneration}>
+          Generate Quiz
+        </Button>
       </CardContent>
     </Card>
   );

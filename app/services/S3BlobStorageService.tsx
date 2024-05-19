@@ -98,6 +98,36 @@ export class S3BlobStorageService implements IBlobStorageService {
     }
 
     /**
+     * Retrieves generated quiz content from a file in the S3 bucket.
+     * 
+     * @param fileKey The key of the file to retrieve the generated quiz from in the S3 bucket.
+     * @returns A promise that resolves with the generated quiz content of the file.
+     */
+    async getGeneratedQuiz(fileKey: string): Promise<string | null> {
+        const bucketName = process.env.AWS_S3_QUIZ_BUCKET_NAME;
+
+        const command = new GetObjectCommand({
+            Bucket: bucketName,
+            Key: "quizzes/" + fileKey + ".json",
+        });
+
+
+        try {
+            const { Body } = await this.s3Client.send(command);
+            const quizContent = await this.streamToBuffer(Body as Readable);
+            const quizText = quizContent.toString('utf-8');
+            return quizText;
+        } catch (error) {
+            if (error instanceof Error && error.name === 'NoSuchKey') {
+                console.error(`NoSuchKey: The specified key does not exist. Key: quizzes/${fileKey}`);
+                return null;
+            }
+            console.error(`Failed to retrieve generated quiz from file with key ${fileKey} from bucket ${bucketName}:`, error);
+            throw new Error(`Failed to retrieve generated quiz from file with key ${fileKey} from bucket ${bucketName}`);
+        }
+    }
+
+    /**
      * Helper function to convert a readable stream to a Buffer.
      * 
      * @param stream The readable stream to convert.
