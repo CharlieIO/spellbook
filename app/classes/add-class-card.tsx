@@ -21,7 +21,7 @@ export function AddClassCard(props: { onSubmit: (name: string) => void }) {
 
   return (
     <Card className="w-full shadow-md max-w-md mx-auto">
-      <CardHeader>
+      <CardHeader>  
         <CardTitle>Add New Class</CardTitle>
       </CardHeader>
       <CardContent>
