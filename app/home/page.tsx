@@ -15,7 +15,7 @@ export default function Home() {
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl">Spellbook</h1>
                   <p className="max-w-full text-muted-foreground md:text-xl">
-                    Spellbook is designed to help you learn more effectively by leveraging your handwritten notes. Here's
+                    Spellbook is designed to help you learn more effectively by leveraging your handwritten notes. Here&apos;s
                     how it works:
                   </p>
                 </div>
@@ -64,7 +64,7 @@ export default function Home() {
                 <div className="text-center space-y-4">
                   <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl">Spellbook</h1>
                   <p className="text-lg text-muted-foreground">
-                    Spellbook is designed to help you learn more effectively by leveraging your handwritten notes. Here's
+                    Spellbook is designed to help you learn more effectively by leveraging your handwritten notes. Here&apos;s
                     how it works:
                   </p>
                 </div>
