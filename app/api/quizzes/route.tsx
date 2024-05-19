@@ -42,6 +42,13 @@ export async function POST(request: NextRequest) {
       numQuestions: numQuestions
     });
 
+    // Write the quiz UUID and class UUID to the database
+    await datastoreService.saveQuizRecord({
+      quizUuid: quizJobUuid,
+      classUuid: classUuid,
+      userId: userId
+    });
+
     return NextResponse.json({ jobUuid: quizJobUuid });
   } catch (error) {
     console.error('Error enqueuing quiz generation job:', error);
@@ -68,10 +75,11 @@ export async function GET(request: NextRequest) {
   }
 
   const blobStorageService: IBlobStorageService = provideBlobStorageService();
+  const datastoreService: IDatastoreAccessService = provideDatastoreService();
+
   const quizResult = await blobStorageService.getGeneratedQuiz(quizUuid);
 
   if (quizResult === null || quizResult === undefined) {
-    console.error('Quiz result is null or undefined for quizUuid:', quizUuid);
     return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
   }
 
@@ -83,6 +91,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid quiz data' }, { status: 500 });
   }
 
+  const { className, error } = await datastoreService.fetchClassNameFromQuizUuid(quizUuid);
+
+  if (error) {
+    console.error('Error fetching class name from quiz UUID:', error);
+    return NextResponse.json({ error: 'Failed to fetch class name' }, { status: 500 });
+  }
+
+  if (!className) {
+    return NextResponse.json({ error: 'Class not found' }, { status: 404 });
+  }
+
+  const quizTitle = `${className} Quiz`;
+
   console.log(`Successfully fetched quiz data for quizUuid: ${quizUuid}`);
-  return NextResponse.json({ quiz: parsedQuizResult });
+  return NextResponse.json({ quiz: parsedQuizResult, title: quizTitle });
 }

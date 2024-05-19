@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
 import { IBlobStorageService } from '@/interfaces/IBlobStorageService';
@@ -111,7 +111,6 @@ export class S3BlobStorageService implements IBlobStorageService {
             Key: "quizzes/" + fileKey + ".json",
         });
 
-
         try {
             const { Body } = await this.s3Client.send(command);
             const quizContent = await this.streamToBuffer(Body as Readable);
@@ -124,6 +123,32 @@ export class S3BlobStorageService implements IBlobStorageService {
             }
             console.error(`Failed to retrieve generated quiz from file with key ${fileKey} from bucket ${bucketName}:`, error);
             throw new Error(`Failed to retrieve generated quiz from file with key ${fileKey} from bucket ${bucketName}`);
+        }
+    }
+
+    /**
+     * Checks if a quiz exists in the S3 bucket.
+     * 
+     * @param fileKey The key of the quiz file to check in the S3 bucket.
+     * @returns A promise that resolves with a boolean indicating whether the quiz exists.
+     */
+    async doesQuizExist(fileKey: string): Promise<boolean> {
+        const bucketName = process.env.AWS_S3_QUIZ_BUCKET_NAME;
+
+        const command = new HeadObjectCommand({
+            Bucket: bucketName,
+            Key: "quizzes/" + fileKey + ".json",
+        });
+
+        try {
+            await this.s3Client.send(command);
+            return true;
+        } catch (error) {
+            if (error instanceof Error && error.name === 'NotFound') {
+                return false;
+            }
+            console.error(`Failed to check existence of quiz with key ${fileKey} from bucket ${bucketName}:`, error);
+            throw new Error(`Failed to check existence of quiz with key ${fileKey} from bucket ${bucketName}`);
         }
     }
 

@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import Options from '@/quizzes/options';
+import Options from '@/quiz/[quizUuid]/options';
 
 type QuestionProps = {
   question: {
@@ -20,8 +20,8 @@ const Question: React.FC<QuestionProps> = ({ question, index, onAnswerSelected, 
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg">{index + 1}. {question.question}</h3>
+    <div className="space-y-6 p-4 border rounded-lg shadow-md">
+      <h3 className="text-xl font-semibold mb-4">{index + 1}. {question.question}</h3>
       <Options
         options={question.answers}
         questionIndex={index}

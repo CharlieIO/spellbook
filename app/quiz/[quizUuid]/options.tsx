@@ -24,7 +24,7 @@ const Options: React.FC<OptionsProps> = ({ options, questionIndex, onOptionSelec
 
   return (
     <RadioGroup onValueChange={(value) => onOptionSelected(parseInt(value))} disabled={answerStatus !== null}>
-      {shuffledOptions.map(({ option, index }) => (
+      {shuffledOptions.length > 0 && shuffledOptions.map(({ option, index }) => (
         <div key={index} className="flex items-center space-x-2">
           <RadioGroupItem value={index.toString()} id={`option-${questionIndex}-${index}`} disabled={answerStatus !== null} />
           <Label htmlFor={`option-${questionIndex}-${index}`} className={`font-sans rounded-lg px-2 py-1 ${

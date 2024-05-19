@@ -179,7 +179,53 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
             return { keys: [], error };
         }
     }
+
+    async saveQuizRecord(quizRecord: { quizUuid: string, classUuid: string, userId: string }): Promise<{ data: any, error: any }> {
+        const client = await createClerkSupabaseClient();
+        try {
+            const { data, error } = await client
+                .from('quiz_records')
+                .insert({
+                    quiz_uuid: quizRecord.quizUuid,
+                    class_uuid: quizRecord.classUuid,
+                    user_id: quizRecord.userId
+                });
+            return { data, error };
+        } catch (error) {
+            console.error('Error saving quiz record:', error);
+            return { data: null, error };
+        }
+    }
+
+    async fetchClassNameFromQuizUuid(quizUuid: string): Promise<{ className: string, error: any }> {
+        const client = await createClerkSupabaseClient();
+        try {
+            const { data, error } = await client
+                .from('quiz_records')
+                .select('class_uuid')
+                .eq('quiz_uuid', quizUuid)
+                .single();
+            if (error) {
+                return { className: '', error };
+            }
+
+            const classUuid = data.class_uuid;
+
+            const { data: classData, error: classError } = await client
+                .from('classes')
+                .select('name')
+                .eq('uuid', classUuid)
+                .single();
+            if (classError) {
+                return { className: '', error: classError };
+            }
+
+            return { className: classData.name, error: null };
+        } catch (error) {
+            console.error('Error fetching class name from quiz UUID:', error);
+            return { className: '', error };
+        }
+    }
 }
 
 export default SupabaseDatastoreAccessService;
-

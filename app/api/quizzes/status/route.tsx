@@ -13,22 +13,19 @@ export async function GET(request: NextRequest) {
   const blobStorageService: IBlobStorageService = provideBlobStorageService();
 
   try {
-    const quizData = await blobStorageService.getGeneratedQuiz(jobUuid);
+    const quizExists = await blobStorageService.doesQuizExist(jobUuid);
 
-    if (quizData) {
-      return NextResponse.json({ quiz: JSON.parse(quizData) });
+    if (quizExists) {
+      return NextResponse.json({ ready: true });
     } else {
-      return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+      return NextResponse.json({ ready: false });
     }
   } catch (error: unknown) {
     if (error instanceof Error && 'code' in error && (error as any).code === 'NoSuchKey') {
-      console.error(`Failed to retrieve generated quiz from file with key ${jobUuid} from bucket spellbook-generated-quizzes:`, error);
-      return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+      return NextResponse.json({ ready: false });
     } else {
-      console.error('Error fetching quiz:', error);
-      return NextResponse.json({ error: 'Failed to fetch quiz' }, { status: 500 });
+      console.error('Error checking quiz existence:', error);
+      return NextResponse.json({ ready: false });
     }
   }
 }
-
-

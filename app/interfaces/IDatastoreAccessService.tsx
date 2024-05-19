@@ -3,6 +3,7 @@ export interface IDatastoreAccessService {
     insertClass(userId: string, className: string): Promise<{ data: any, error: any }>;
     fetchClass(userId: string, classUuid: string): Promise<{ data: any, error: any }>;
     fetchClassName(classUuid: string): Promise<{ className: string, error: any }>;
+    fetchClassNameFromQuizUuid(quizUuid: string): Promise<{ className: string, error: any }>;
     fetchClassesWithDescription(userId: string, classUuid: string): Promise<{ data: any, description: string | null, error: any }>;
 
     // Note-related methods
@@ -14,4 +15,7 @@ export interface IDatastoreAccessService {
     // Description-related methods
     insertDescription(classId: string, description: string): Promise<{ data: any, error: any }>;
     fetchDescriptions(classId: string): Promise<{ descriptions: string[], error: any }>;
+
+    // Quiz-related methods
+    saveQuizRecord(quizRecord: { quizUuid: string, classUuid: string, userId: string }): Promise<{ data: any, error: any }>;
 }

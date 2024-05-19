@@ -4,4 +4,5 @@ export interface IBlobStorageService {
     getTextFromFile(fileKey: string): Promise<string>;
     deleteFile(fileKey: string): Promise<void>;
     getGeneratedQuiz(fileKey: string): Promise<string | null>;
+    doesQuizExist(fileKey: string): Promise<boolean>;
 }
