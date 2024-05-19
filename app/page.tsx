@@ -28,7 +28,7 @@ export default function Home() {
           <p className="py-6 text-base lg:text-lg 2xl:text-xl">
             Turn your notes into flashcards, study guides, quizzes, and more. Magically.
           </p>
-          <div className="flex gap-3">
+          <div className="flex gap-3 justify-center md:justify-start">
             <Link href="/login">
               <Button className="mb-8 md:mb-12 sm:mb-10 lg:mb-0">
                 Log in
