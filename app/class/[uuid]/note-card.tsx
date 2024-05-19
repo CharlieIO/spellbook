@@ -79,7 +79,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
   );
 
   return (
-    <Card className="max-w-sm w-full">
+    <Card className="max-w-sm w-full shadow-md">
       <CardContent className="p-0">
         {isFullScreen ? createPortal(<div style={fullScreenStyle}>{imageContainer}</div>, document.body) : imageContainer}
         {createPortal(

@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import Options from '@/quiz/[quizUuid]/options';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 type QuestionProps = {
   question: {
@@ -20,17 +21,21 @@ const Question: React.FC<QuestionProps> = ({ question, index, onAnswerSelected, 
   };
 
   return (
-    <div className="space-y-6 p-4 border rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold mb-4">{index + 1}. {question.question}</h3>
-      <Options
-        options={question.answers}
-        questionIndex={index}
-        onOptionSelected={handleOptionSelected}
-        answerStatus={answerStatus}
-        correctAnswerIndex={question.correctAnswerIndex}
-        selectedAnswerIndex={selectedAnswerIndex}
-      />
-    </div>
+    <Card className="shadow-md">
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold mb-4">{index + 1}. {question.question}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Options
+          options={question.answers}
+          questionIndex={index}
+          onOptionSelected={handleOptionSelected}
+          answerStatus={answerStatus}
+          correctAnswerIndex={question.correctAnswerIndex}
+          selectedAnswerIndex={selectedAnswerIndex}
+        />
+      </CardContent>
+    </Card>
   );
 };
 

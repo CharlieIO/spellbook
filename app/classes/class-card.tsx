@@ -33,7 +33,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({ classItem, isLoading = fal
 
   return (
     <Link href={`/class/${classItem.uuid}`}>
-      <Card className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
+      <Card className="w-full shadow-md transition-colors hover:bg-accent">
         <CardHeader>
           <CardTitle>{classItem.name}</CardTitle>
         </CardHeader>

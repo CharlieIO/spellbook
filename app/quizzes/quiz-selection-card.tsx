@@ -75,7 +75,7 @@ export function QuizSelectionCard() {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full shadow-md max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Generate Quiz</CardTitle>
         <CardDescription>Select a class and number of questions to generate a quiz.</CardDescription>
