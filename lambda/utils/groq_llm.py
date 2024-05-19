@@ -17,6 +17,7 @@ class GroqLLM(LLMInterface):
                         "The quiz should include questions and multiple-choice answers derived from the notes content. "
                         f"The quiz should have exactly {num_questions} questions. "
                         "The questions should focus on the most important information in the text, ensuring they are useful for study purposes. "
+                        "Feel free to make them difficult, but make sure they draw from the notes and are useful for the user."
                         "Only respond in the following format: \n"
                         "{\n"
                         "  \"questions\": [\n"
