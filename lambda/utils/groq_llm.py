@@ -13,10 +13,12 @@ class GroqLLM(LLMInterface):
                 {
                     "role": "system",
                     "content": (
-                        "Generate a quiz in JSON format based on the provided notes. "
-                        "The quiz should include questions and multiple-choice answers derived from the notes content. "
+                        "Generate a quiz in JSON format based on the provided notes (found inside the triple quotes). "
+                        "The quiz should include question text and multiple-choice answers derived from the notes content. "
+                        "When you come up with the answer options, try to keep them realistic. "
                         f"The quiz should have exactly {num_questions} questions. "
-                        "Feel free to make the questions difficult, but make sure they draw from the notes and are useful for the user."
+                        "Feel free to make the questions difficult, but make sure they draw from the notes and are useful for the user. "
+                        "Do not mention \"the notes\" in any form in the questions or answers. For example do not say \"according to the notes\" or, \"as indicated by the notes\". "
                         "Only respond in the following format: \n"
                         "{\n"
                         "  \"questions\": [\n"
@@ -33,7 +35,7 @@ class GroqLLM(LLMInterface):
                 },
                 {
                     "role": "user",
-                    "content": f"Notes: {concatenated_notes}",
+                    "content": f"Notes: '''{concatenated_notes}'''",
                 }
             ],
             model="llama3-70b-8192",

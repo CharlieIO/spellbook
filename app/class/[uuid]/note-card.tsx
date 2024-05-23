@@ -57,11 +57,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ imageSrc, onDelete }) => {
         className="w-full h-full object-contain cursor-pointer"
         src={imageSrc}
         fill
-        sizes="100vw"
+        sizes={isFullScreen ? "100vw" : "(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"}
         style={{
           objectFit: 'contain',
           objectPosition: 'center',
         }}
+        priority={true} // Added priority property
       />
       <Button
         className="absolute top-2 right-2 bg-primary text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-100"

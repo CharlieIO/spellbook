@@ -104,7 +104,7 @@ const LoadingPage = ({ params }: { params: { quizUuid: string } }) => {
     <>
       <NavBar />
       <div className="flex flex-col items-center justify-center h-full p-4 mt-8">
-        <Card className="w-full max-w-lg h-64 pt-4 pb-8 md:pb-8">
+        <Card className="w-full max-w-lg h-64 pt-4 pb-8 md:pb-8 shadow-md">
           <CardHeader>
             <CardTitle className="text-center">Generating Quiz</CardTitle>
           </CardHeader>

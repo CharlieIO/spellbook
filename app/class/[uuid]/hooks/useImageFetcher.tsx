@@ -7,6 +7,17 @@ export function useImageFetcher(classUuid: string, currentPage: number, imagesPe
 
   const fetchImages = useCallback(async () => {
     setIsLoading(true);
+    const cacheKey = `images-${classUuid}-${currentPage}`;
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      const { images, totalPages } = JSON.parse(cachedData);
+      setImages(images);
+      setTotalPages(totalPages);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/class/notes?classUuid=${classUuid}&page=${currentPage}&limit=${imagesPerPage}`, {
         method: 'GET',
@@ -24,6 +35,7 @@ export function useImageFetcher(classUuid: string, currentPage: number, imagesPe
       }));
       setImages(formattedImages);
       setTotalPages(data.totalPages);
+      localStorage.setItem(cacheKey, JSON.stringify({ images: formattedImages, totalPages: data.totalPages }));
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {

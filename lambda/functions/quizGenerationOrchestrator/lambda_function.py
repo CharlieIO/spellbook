@@ -8,20 +8,19 @@ from utils.s3_utils import get_s3_object_as_text, put_s3_object
 sqs_client = boto3.client('sqs')
 
 def score_page(content: str) -> int:
-    return len(content.split())  # Simple word count as content density score
+    return len(content.split())
 
 def fetch_note_content(note_key: str) -> str:
     s3_bucket_name = 'spellbook-imagestore-ocr-results'
     s3_key = f'processed/{note_key}'
     try:
-        note_content = get_s3_object_as_text(s3_bucket_name, s3_key)
+        return get_s3_object_as_text(s3_bucket_name, s3_key)
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':
             print(f"Error: The key {s3_key} does not exist in bucket {s3_bucket_name}.")
             return None
         else:
             raise
-    return note_content
 
 def softmax(x):
     max_x = max(x)
@@ -37,7 +36,6 @@ def calculate_questions_per_note(note_scores, total_questions):
     total_score = sum(score for _, score in note_scores)
     
     if total_score == 0:
-        # If all scores are zero, distribute questions evenly
         questions_per_note = [(note_key, total_questions // len(note_scores)) for note_key, _ in note_scores]
         remaining_questions = total_questions % len(note_scores)
     else:
@@ -68,7 +66,6 @@ def lambda_handler(event, context):
         print(record)
 
         results = []
-        all_notes_content = []
         message_body = json.loads(record['body'])
         note_keys = message_body['noteKeys']
         num_questions = int(message_body['numQuestions'])
@@ -79,8 +76,7 @@ def lambda_handler(event, context):
         note_scores = []
         for note_key in note_keys:
             note_content = fetch_note_content(note_key)
-            if note_content is not None:
-                all_notes_content.append(note_content)
+            if note_content:
                 score = score_page(note_content)
                 note_scores.append((note_key, score))
 

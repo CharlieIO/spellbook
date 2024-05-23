@@ -66,7 +66,7 @@ const Quiz: React.FC<QuizProps> = ({ quizData, onComplete, onBack }) => {
         />
       ))}
       {!quizCompleted && (
-        <div className="pt-4">
+        <div className="pt-4 w-11/12 mx-auto">
           <Progress value={progressValue} />
           <p className="text-center mt-2">{answeredQuestionsCount} / {totalQuestionsCount} questions answered</p>
         </div>
