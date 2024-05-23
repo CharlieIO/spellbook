@@ -12,6 +12,14 @@ const Description: React.FC<DescriptionProps> = ({ uuid }) => {
 
   useEffect(() => {
     const fetchDescription = async () => {
+      const cachedDescription = localStorage.getItem(`classDescription_${uuid}`);
+      if (cachedDescription) {
+        console.log(`Description for UUID: ${uuid} found in localStorage`);
+        setDescription(cachedDescription);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`/api/class/description`, {
           method: 'POST',
@@ -30,6 +38,7 @@ const Description: React.FC<DescriptionProps> = ({ uuid }) => {
         if (data.error) {
           console.error('Error fetching class description:', data.error);
         } else {
+          localStorage.setItem(`classDescription_${uuid}`, data.description);
           setDescription(data.description);
         }
       } catch (e) {
@@ -52,4 +61,3 @@ const Description: React.FC<DescriptionProps> = ({ uuid }) => {
 };
 
 export default Description;
-

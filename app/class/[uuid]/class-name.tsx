@@ -11,6 +11,13 @@ const ClassName: React.FC<ClassNameProps> = ({ uuid }) => {
 
   useEffect(() => {
     async function fetchClassName() {
+      const cachedName = localStorage.getItem(`className_${uuid}`);
+      if (cachedName) {
+        console.log(`Class name for UUID: ${uuid} found in localStorage`);
+        setName(cachedName);
+        return;
+      }
+
       console.log(`Attempting to fetch class name for UUID: ${uuid}`);
       try {
         const response = await fetch(`/api/class?uuid=${uuid}`);
@@ -22,8 +29,9 @@ const ClassName: React.FC<ClassNameProps> = ({ uuid }) => {
         const data = await response.json();
         console.log('Data received from server:', data);
         if (data && data.data && data.data.name) {
+          localStorage.setItem(`className_${uuid}`, data.data.name);
           setName(data.data.name);
-          console.log(`Class name set to state: ${data.data.name}`);
+          console.log(`Class name set to state and cached in localStorage: ${data.data.name}`);
         } else {
           console.error('Class name not found in response data');
         }
