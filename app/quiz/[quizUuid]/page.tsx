@@ -6,6 +6,7 @@ import Quiz from '@/quiz/[quizUuid]/quiz';
 import Review from '@/quiz/[quizUuid]/review';
 
 type QuizData = {
+  quizUuid: string;
   title: string;
   questions: {
     question: string;
@@ -37,6 +38,7 @@ export default function QuizPage({ params }: { params: { quizUuid: string } }) {
             throw new Error(data.error);
           }
           setQuizData({
+            quizUuid: quizUuid,
             ...data.quiz,
             title: data.title
           });

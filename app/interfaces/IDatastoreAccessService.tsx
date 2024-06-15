@@ -18,4 +18,6 @@ export interface IDatastoreAccessService {
 
     // Quiz-related methods
     saveQuizRecord(quizRecord: { quizUuid: string, classUuid: string, userId: string }): Promise<{ data: any, error: any }>;
+    saveQuizScore(quizScore: { quizUuid: string, score: number }): Promise<{ data: any, error: any }>;
+    fetchAllQuizScoresForClass(classUuid: string): Promise<{ scores: { quizUuid: string, score: number, createdAt: string }[], error: any }>;
 }

@@ -9,9 +9,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 .from('classes')
                 .insert({ user_id: userId, name: className });
             return { data, error };
-        } catch (error) {
-            console.error('Error inserting class:', error);
-            return { data: null, error };
+        } catch (err) {
+            console.error('Error inserting class:', err);
+            return { data: null, error: err };
         }
     }
 
@@ -24,9 +24,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 .match({ uuid: classUuid, user_id: userId })
                 .single();
             return { data, error };
-        } catch (error) {
-            console.error('Error fetching class:', error);
-            return { data: null, error };
+        } catch (err) {
+            console.error('Error fetching class:', err);
+            return { data: null, error: err };
         }
     }
 
@@ -42,9 +42,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 return { className: '', error };
             }
             return { className: data.name, error: null };
-        } catch (error) {
-            console.error('Error fetching class name:', error);
-            return { className: '', error };
+        } catch (err) {
+            console.error('Error fetching class name:', err);
+            return { className: '', error: err };
         }
     }
 
@@ -68,9 +68,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 description: classItem.class_descriptions.length > 0 ? classItem.class_descriptions[0].description : null,
             }));
             return { data: classesWithDescription, description: null, error: null };
-        } catch (error) {
-            console.error('Error fetching classes with descriptions:', error);
-            return { data: null, description: null, error };
+        } catch (err) {
+            console.error('Error fetching classes with descriptions:', err);
+            return { data: null, description: null, error: err };
         }
     }
 
@@ -86,9 +86,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                     url: url
                 });
             return { data, error };
-        } catch (error) {
-            console.error('Error inserting note:', error);
-            return { data: null, error };
+        } catch (err) {
+            console.error('Error inserting note:', err);
+            return { data: null, error: err };
         }
     }
 
@@ -108,9 +108,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 .match({ user_id: userId, class_uuid: classUuid });
             const count = totalNotesCount.count || 0;
             return { data, error, count };
-        } catch (error) {
-            console.error('Error fetching notes:', error);
-            return { data: null, error, count: 0 };
+        } catch (err) {
+            console.error('Error fetching notes:', err);
+            return { data: null, error: err, count: 0 };
         }
     }
 
@@ -122,9 +122,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 .delete()
                 .match({ blob_key: imageKey, user_id: userId });
             return { error };
-        } catch (error) {
-            console.error('Error deleting note:', error);
-            return { error };
+        } catch (err) {
+            console.error('Error deleting note:', err);
+            return { error: err };
         }
     }
 
@@ -135,9 +135,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                 .from('class_descriptions')
                 .insert({ class_id: classId, description: description });
             return { data, error };
-        } catch (error) {
-            console.error('Error inserting description:', error);
-            return { data: null, error };
+        } catch (err) {
+            console.error('Error inserting description:', err);
+            return { data: null, error: err };
         }
     }
 
@@ -154,9 +154,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
             }
             const descriptions = data.map((item: { description: string }) => item.description);
             return { descriptions, error: null };
-        } catch (error) {
-            console.error('Error fetching descriptions:', error);
-            return { descriptions: [], error };
+        } catch (err) {
+            console.error('Error fetching descriptions:', err);
+            return { descriptions: [], error: err };
         }
     }
 
@@ -174,9 +174,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
 
             const keys = data.map((item: { blob_key: string }) => item.blob_key);
             return { keys, error: null };
-        } catch (error) {
-            console.error('Error fetching note keys for class:', error);
-            return { keys: [], error };
+        } catch (err) {
+            console.error('Error fetching note keys for class:', err);
+            return { keys: [], error: err };
         }
     }
 
@@ -191,9 +191,9 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
                     user_id: quizRecord.userId
                 });
             return { data, error };
-        } catch (error) {
-            console.error('Error saving quiz record:', error);
-            return { data: null, error };
+        } catch (err) {
+            console.error('Error saving quiz record:', err);
+            return { data: null, error: err };
         }
     }
 
@@ -221,9 +221,78 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
             }
 
             return { className: classData.name, error: null };
-        } catch (error) {
-            console.error('Error fetching class name from quiz UUID:', error);
-            return { className: '', error };
+        } catch (err) {
+            console.error('Error fetching class name from quiz UUID:', err);
+            return { className: '', error: err };
+        }
+    }
+
+    async saveQuizScore(quizScore: { quizUuid: string, userId: string, score: number }): Promise<{ data: any, error: any }> {
+        const client = await createClerkSupabaseClient();
+        try {
+            // Check if a score already exists for the given quizUuid
+            const { data: existingScore, error: fetchError } = await client
+                .from('quiz_scores')
+                .select('quiz_uuid')
+                .eq('quiz_uuid', quizScore.quizUuid)
+                .single();
+
+            if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the code for "No rows found"
+                return { data: null, error: fetchError };
+            }
+
+            if (existingScore) {
+                return { data: null, error: 'A score for this quiz already exists.' };
+            }
+
+            const { data, error } = await client
+                .from('quiz_scores')
+                .insert({
+                    quiz_uuid: quizScore.quizUuid,
+                    score: quizScore.score
+                });
+            return { data, error };
+        } catch (err) {
+            console.error('Error saving quiz score:', err);
+            return { data: null, error: err };
+        }
+    }
+
+    async fetchAllQuizScoresForClass(classUuid: string): Promise<{ scores: { quizUuid: string, score: number, createdAt: string }[], error: any }> {
+        const client = await createClerkSupabaseClient();
+        try {
+            // Fetch all quiz UUIDs for the given class UUID
+            const { data: quizRecords, error: quizRecordsError } = await client
+                .from('quiz_records')
+                .select('quiz_uuid')
+                .eq('class_uuid', classUuid);
+
+            if (quizRecordsError) {
+                return { scores: [], error: quizRecordsError };
+            }
+
+            const quizUuids = quizRecords.map((record: { quiz_uuid: string }) => record.quiz_uuid);
+
+            // Fetch all scores for the quiz UUIDs
+            const { data: scoresData, error: scoresError } = await client
+                .from('quiz_scores')
+                .select('quiz_uuid, score, created_at')
+                .in('quiz_uuid', quizUuids);
+
+            if (scoresError) {
+                return { scores: [], error: scoresError };
+            }
+
+            const formattedScores = scoresData.map((score: { quiz_uuid: string, score: number, created_at: string }) => ({
+                quizUuid: score.quiz_uuid,
+                score: score.score,
+                createdAt: score.created_at
+            }));
+
+            return { scores: formattedScores, error: null };
+        } catch (err) {
+            console.error('Error fetching scores for class:', err);
+            return { scores: [], error: err };
         }
     }
 }

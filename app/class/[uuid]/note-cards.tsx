@@ -81,5 +81,3 @@ function TrashIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
-
-

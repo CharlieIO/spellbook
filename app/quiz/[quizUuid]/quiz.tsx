@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 
 type QuizProps = {
   quizData: {
+    quizUuid: string;
     title: string;
     questions: {
       question: string;
@@ -29,7 +30,7 @@ const Quiz: React.FC<QuizProps> = ({ quizData, onComplete, onBack }) => {
     setUserAnswers(newAnswers);
   };
 
-  const handleQuizComplete = () => {
+  const handleQuizComplete = async () => {
     const newAnswerStatus = [...answerStatus];
     let correctCount = 0;
     const wrongQuestionIndices: number[] = [];
@@ -46,6 +47,26 @@ const Quiz: React.FC<QuizProps> = ({ quizData, onComplete, onBack }) => {
     const score = (correctCount / quizData.questions.length) * 100;
     onComplete(score, wrongQuestionIndices);
     setQuizCompleted(true);
+
+    // Write the score to the database using the API
+    try {
+      const response = await fetch('/api/quizzes/score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quizUuid: quizData.quizUuid,
+          score: score,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save quiz score');
+      }
+    } catch (error) {
+      console.error('Error saving quiz score:', error);
+    }
   };
 
   const answeredQuestionsCount = userAnswers.filter(answer => answer !== -1).length;
