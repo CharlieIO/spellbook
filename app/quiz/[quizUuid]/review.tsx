@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { NextPage } from 'next';
 import { CardTitle, CardHeader, CardContent, CardFooter, Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/loadingspinner";
 
 interface ReviewProps {
@@ -21,7 +20,7 @@ const Review: NextPage<ReviewProps> = ({ score, quizUuid, wrongQuestionIndices }
   const [loading, setLoading] = useState<boolean>(true);
 
   // Helper function to fetch review topics
-  const fetchReviewTopics = async () => {
+  const fetchReviewTopics = useCallback(async () => {
     try {
       const response = await fetch(`/api/quizzes/review`, {
         method: 'POST',
@@ -43,7 +42,7 @@ const Review: NextPage<ReviewProps> = ({ score, quizUuid, wrongQuestionIndices }
     } finally {
       setLoading(false);
     }
-  };
+  }, [quizUuid, wrongQuestionIndices]);
 
   // Effect to fetch review topics when component mounts or dependencies change
   useEffect(() => {
@@ -55,7 +54,7 @@ const Review: NextPage<ReviewProps> = ({ score, quizUuid, wrongQuestionIndices }
       setError('Quiz UUID and wrong question indices are required');
       setLoading(false);
     }
-  }, [quizUuid, wrongQuestionIndices]);
+  }, [quizUuid, wrongQuestionIndices, fetchReviewTopics]);
 
   return (
     <Card className="w-full">

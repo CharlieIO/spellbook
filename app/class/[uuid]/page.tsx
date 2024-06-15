@@ -2,7 +2,6 @@ import { NoteManagement } from "@/class/[uuid]/note-cards";
 import ClassName from "./class-name";
 import NavBar from "@/components/navbar"; // Assuming the Navbar component is located in the components directory
 import Description from "./Description";
-import QuizPerformanceGraph from "@/class/[uuid]/quiz-performance-graph";
 
 export default function Page({ params }: { params: { uuid: string } }) {
   return (

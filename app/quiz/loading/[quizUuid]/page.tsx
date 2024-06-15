@@ -1,13 +1,13 @@
 "use client";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, Reducer } from 'react';
 import { pollQuizStatus } from '@/utils/polling';
 import { LoadingSpinner } from '@/components/loadingspinner';
 import NavBar from '@/components/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const funFacts = [
+const funFacts: string[] = [
   "Honey never spoils. Archaeologists found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still edible.",
   "Bananas are berries, but strawberries aren't. This is due to the botanical definitions of berries.",
   "A day on Venus is longer than a year on Venus. It takes 243 Earth days to rotate once.",
@@ -43,7 +43,7 @@ const funFacts = [
   "The longest recorded time for a person to go without sleep is 11 days. It was achieved by Randy Gardner in 1964."
 ];
 
-const compliments = [
+const compliments: string[] = [
   "You're a rockstar, keep shining!",
   "You're doing amazing, sweetie!",
   "Your creativity knows no bounds!",
@@ -66,11 +66,36 @@ const compliments = [
   "Your energy is boundless!"
 ];
 
+interface State {
+  currentFactIndex: number;
+  shuffledFacts: string[];
+}
+
+interface Action {
+  type: 'SET_SHUFFLED_FACTS' | 'INCREMENT_FACT_INDEX';
+  payload?: string[];
+}
+
+const initialState: State = {
+  currentFactIndex: 0,
+  shuffledFacts: [...funFacts, ...compliments]
+};
+
+const reducer: Reducer<State, Action> = (state, action) => {
+  switch (action.type) {
+    case 'SET_SHUFFLED_FACTS':
+      return { ...state, shuffledFacts: action.payload || [] };
+    case 'INCREMENT_FACT_INDEX':
+      return { ...state, currentFactIndex: (state.currentFactIndex + 1) % state.shuffledFacts.length };
+    default:
+      return state;
+  }
+};
+
 const LoadingPage = ({ params }: { params: { quizUuid: string } }) => {
   const router = useRouter();
   const { quizUuid } = params;
-  const [currentFactIndex, setCurrentFactIndex] = useState(0);
-  const [shuffledFacts, setShuffledFacts] = useState([...funFacts, ...compliments]);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     if (quizUuid) {
@@ -83,7 +108,7 @@ const LoadingPage = ({ params }: { params: { quizUuid: string } }) => {
   }, [quizUuid, router]);
 
   useEffect(() => {
-    const shuffleArray = (array: any[]) => {
+    const shuffleArray = (array: string[]) => {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
@@ -91,14 +116,14 @@ const LoadingPage = ({ params }: { params: { quizUuid: string } }) => {
       return array;
     };
 
-    setShuffledFacts(shuffleArray([...funFacts, ...compliments]));
+    dispatch({ type: 'SET_SHUFFLED_FACTS', payload: shuffleArray([...funFacts, ...compliments]) });
 
     const factInterval = setInterval(() => {
-      setCurrentFactIndex((prevIndex) => (prevIndex + 1) % shuffledFacts.length);
+      dispatch({ type: 'INCREMENT_FACT_INDEX' });
     }, 10000); // Change fact every 10 seconds
 
     return () => clearInterval(factInterval);
-  }, []);
+  }, [state.shuffledFacts.length]);
 
   return (
     <>
@@ -112,14 +137,14 @@ const LoadingPage = ({ params }: { params: { quizUuid: string } }) => {
             <LoadingSpinner className="h-10 w-10 mb-4" />
             <AnimatePresence mode="wait">
               <motion.p
-                key={currentFactIndex}
+                key={state.currentFactIndex}
                 className="text-md text-center text-base italic"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                {shuffledFacts[currentFactIndex]}
+                {state.shuffledFacts[state.currentFactIndex]}
               </motion.p>
             </AnimatePresence>
           </CardContent>
