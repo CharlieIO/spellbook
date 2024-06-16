@@ -70,7 +70,9 @@ export function useImageFetcher(classUuid: string, currentPage: number, imagesPe
       }));
       setImages(formattedImages);
       setTotalPages(data.totalPages);
-      localStorage.setItem(cacheKey, JSON.stringify({ images: formattedImages, totalPages: data.totalPages }));
+      if (formattedImages.length > 0) {
+        localStorage.setItem(cacheKey, JSON.stringify({ images: formattedImages, totalPages: data.totalPages }));
+      }
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {
