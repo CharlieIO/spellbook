@@ -70,6 +70,7 @@ def lambda_handler(event, context):
         note_keys = message_body['noteKeys']
         num_questions = int(message_body['numQuestions'])
         job_id = message_body['jobUuid']
+        topics = message_body['topics']
 
         total_requested_questions += num_questions
 
@@ -87,7 +88,8 @@ def lambda_handler(event, context):
                 print(f"Note {note_key} is assigned {num_questions_for_note} questions.")
                 payload = {
                     'noteKeys': [note_key],
-                    'numQuestions': num_questions_for_note
+                    'numQuestions': num_questions_for_note,
+                    'topics': topics
                 }
                 response = invoke_lambda('quizGeneration', payload)
                 results.append(response)

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { classUuid, numQuestions } = body;
+  const { classUuid, numQuestions, topics } = body;
 
   if (!classUuid) {
     return NextResponse.json({ error: 'Class UUID is required' }, { status: 400 });
@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
     await queueService.enqueue({
       jobUuid: quizJobUuid,
       noteKeys: notesKeys,
-      numQuestions: numQuestions
+      numQuestions: numQuestions,
+      topics: topics,
     });
 
     // Write the quiz UUID and class UUID to the database

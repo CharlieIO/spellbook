@@ -1,0 +1,16 @@
+FROM python:3.8-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y zip
+
+COPY functions/topicExtraction/requirements.txt .
+RUN pip install --target ./package -r requirements.txt
+
+COPY utils/groq_llm.py ./package/utils/
+COPY utils/openai_llm.py ./package/utils/
+COPY utils/llm_interface.py ./package/utils/
+COPY utils/s3_utils.py ./package/utils/
+COPY functions/topicExtraction/lambda_function.py ./package/
+
+RUN cd package && zip -r ../function.zip .

@@ -15,6 +15,7 @@ def lambda_handler(event, context):
     # Extract parameters from the event
     note_keys = event['noteKeys']
     num_questions = event['numQuestions']
+    topics = event['topics']
     
     # Get the LLM provider from environment variable
     provider_name = os.environ.get('LLM_PROVIDER', 'groq')
@@ -29,7 +30,7 @@ def lambda_handler(event, context):
         notes.append(note_content)
 
     # Generate quiz using the LLM provider
-    quiz = llm_provider.generate_quiz(notes, num_questions)
+    quiz = llm_provider.generate_quiz(notes, num_questions, topics)
     
     # Return the generated quiz as a JSON object
     return {

@@ -153,6 +153,41 @@ export class S3BlobStorageService implements IBlobStorageService {
     }
 
     /**
+     * Retrieves topics for the given note keys.
+     * 
+     * @param noteKeys An array of note keys to retrieve topics for.
+     * @returns A promise that resolves with an array of topics.
+     */
+    async getTopicsForNoteKeys(noteKeys: string[]): Promise<string[]> {
+        const bucketName = process.env.AWS_S3_TOPIC_BUCKET_NAME;
+        const topics: string[] = [];
+
+        for (const noteKey of noteKeys) {
+            const command = new GetObjectCommand({
+                Bucket: bucketName,
+                Key: "topics/processed/" + noteKey,
+            });
+
+            try {
+                const { Body } = await this.s3Client.send(command);
+                const noteContent = await this.streamToBuffer(Body as Readable);
+                const noteText = noteContent.toString('utf-8');
+                const noteArray = JSON.parse(noteText);
+                if (Array.isArray(noteArray)) {
+                    topics.push(...noteArray);
+                } else {
+                    console.warn(`Expected an array in note with key ${noteKey}, but got:`, noteArray);
+                }
+            } catch (error) {
+                console.error(`Failed to retrieve note with key ${noteKey} from bucket ${bucketName}:`, error);
+                throw new Error(`Failed to retrieve note with key ${noteKey} from bucket ${bucketName}`);
+            }
+        }
+
+        return topics;
+    }
+
+    /**
      * Helper function to convert a readable stream to a Buffer.
      * 
      * @param stream The readable stream to convert.

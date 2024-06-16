@@ -19,8 +19,9 @@ deploy_lambda() {
   rm function.zip
 }
 
-# deploy_lambda "notesOcrJob" "notes-ocr-job-image" "functions/notesOcrJob/Dockerfile" .
-# deploy_lambda "quizGeneration" "quiz-generation-image" "functions/quizGeneration/Dockerfile" .
+deploy_lambda "notesOcrJob" "notes-ocr-job-image" "functions/notesOcrJob/Dockerfile" .
+deploy_lambda "quizGeneration" "quiz-generation-image" "functions/quizGeneration/Dockerfile" .
 deploy_lambda "quizGenerationOrchestrator" "quiz-generation-orchestrator-image" "functions/quizGenerationOrchestrator/Dockerfile" .
+deploy_lambda "topicExtraction" "topic-extraction-image" "functions/topicExtraction/Dockerfile" .
 
 echo "Deployment complete."

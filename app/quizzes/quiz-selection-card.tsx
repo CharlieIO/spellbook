@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface ClassItem {
   uuid: string;
@@ -13,9 +15,11 @@ interface ClassItem {
 
 export function QuizSelectionCard() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [topics, setTopics] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [numberOfQuestions, setNumberOfQuestions] = useState('5');
   const [selectedClassUuid, setSelectedClassUuid] = useState<string | null>(null);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const router = useRouter();
 
@@ -51,6 +55,33 @@ export function QuizSelectionCard() {
     fetchClasses();
   }, []);
 
+  useEffect(() => {
+    async function fetchTopics() {
+      if (!selectedClassUuid) return;
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/class/topics?classUuid=${selectedClassUuid}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch topics');
+        }
+        const jsonResponse = await response.json();
+        if (jsonResponse.topics && Array.isArray(jsonResponse.topics)) {
+          console.log('Fetched topics:', jsonResponse.topics); // Log the topics for testing
+          setTopics(jsonResponse.topics);
+        } else {
+          throw new Error('Invalid data structure');
+        }
+      } catch (error) {
+        console.error('Error fetching topics:', error);
+        setTopics([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTopics();
+  }, [selectedClassUuid]);
+  
   const handleQuizGeneration = async () => {
     if (selectedClassUuid && numberOfQuestions) {
       setIsButtonDisabled(true);
@@ -60,7 +91,7 @@ export function QuizSelectionCard() {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ classUuid: selectedClassUuid, numQuestions: numberOfQuestions })
+          body: JSON.stringify({ classUuid: selectedClassUuid, numQuestions: numberOfQuestions, topics: selectedTopics })
         });
         if (!response.ok) {
           throw new Error('Failed to enqueue quiz generation job');
@@ -74,11 +105,15 @@ export function QuizSelectionCard() {
     }
   };
 
+  const handleTopicChange = (values: string[]) => {
+    setSelectedTopics(values);
+  };
+
   return (
     <Card className="w-full shadow-md max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Generate Quiz</CardTitle>
-        <CardDescription>Select a class and number of questions to generate a quiz.</CardDescription>
+        <CardDescription>Select a class, topics (optional), and number of questions to generate a quiz.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -111,6 +146,20 @@ export function QuizSelectionCard() {
             </SelectContent>
           </Select>
         </div>
+        {selectedClassUuid && topics.length > 0 && (
+          <div className="space-y-2">
+            <Label htmlFor="topics">Topics of Focus (select none or more)</Label>
+            <ScrollArea className="h-32 border-2">
+              <ToggleGroup type="multiple" onValueChange={handleTopicChange} disabled={isLoading || isButtonDisabled} className="flex flex-col">
+                {topics.map((topicName: string, index: number) => (
+                  <ToggleGroupItem key={index} value={topicName}>
+                    {topicName}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </ScrollArea>
+          </div>
+        )}
         <Button className="w-full" onClick={handleQuizGeneration} disabled={isLoading || isButtonDisabled}>
           Generate Quiz
         </Button>
