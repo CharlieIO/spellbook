@@ -47,6 +47,16 @@ async function uploadFilesToSignedUrls(files: FileList, presignedUrls: { presign
   }));
 }
 
+// Function to invalidate cache
+function invalidateCache(classUuid: string) {
+  const cacheKeyPrefix = `images-${classUuid}-`;
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith(cacheKeyPrefix)) {
+      localStorage.removeItem(key);
+    }
+  });
+}
+
 // Hook to manage file uploads
 export function useFileUploader(classUuid: string) {
   const handleUpload = useCallback(async (files: FileList | null) => {
@@ -55,6 +65,7 @@ export function useFileUploader(classUuid: string) {
       try {
         const presignedUrls = await fetchPresignedUrls(fileNames, classUuid);
         await uploadFilesToSignedUrls(files, presignedUrls);
+        invalidateCache(classUuid);
         console.log('All files uploaded successfully');
       } catch (error) {
         console.error('Error during file upload:', error);
