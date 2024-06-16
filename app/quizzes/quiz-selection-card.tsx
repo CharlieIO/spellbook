@@ -149,11 +149,12 @@ export function QuizSelectionCard() {
         {selectedClassUuid && topics.length > 0 && (
           <div className="space-y-2">
             <Label htmlFor="topics">Topics of Focus (select none or more)</Label>
-            <ScrollArea className="h-32 border-2">
-              <ToggleGroup type="multiple" onValueChange={handleTopicChange} disabled={isLoading || isButtonDisabled} className="flex flex-col">
+            <p className="text-sm"><em>Your selections will act as suggestions for the AI model to use to generate questions. The questions may not reflect only the selected topics.</em></p>
+            <ScrollArea className="h-64 border-2 rounded-lg">
+              <ToggleGroup type="multiple" onValueChange={handleTopicChange} disabled={isLoading || isButtonDisabled} className="flex flex-col space-y-2">
                 {topics.map((topicName: string, index: number) => (
-                  <ToggleGroupItem key={index} value={topicName}>
-                    {topicName}
+                  <ToggleGroupItem key={index} value={topicName} className="rounded-lg">
+                    <span className="font-normal">{topicName}</span>
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
