@@ -39,7 +39,7 @@ export function QuizSelectionCard() {
               name: item.name,
               created_at: item.created_at
             }))
-            .sort((a: ClassItem, b: ClassItem) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            .sort((a: ClassItem, b: ClassItem) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
           setClasses(sortedClasses);
         } else {
           throw new Error('Invalid data structure');
@@ -112,8 +112,12 @@ export function QuizSelectionCard() {
   return (
     <Card className="w-full shadow-md max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Generate Quiz</CardTitle>
-        <CardDescription>Select a class, topics (optional), and number of questions to generate a quiz.</CardDescription>
+        <CardTitle>Practice Quiz</CardTitle>
+        <CardDescription>
+          Select a class, number of questions, and focus topics (optional) to generate a quiz. 
+          Topic extraction is based on your notes, and may take a few minutes after file upload.
+          Available topics will display after selecting a class.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -148,7 +152,7 @@ export function QuizSelectionCard() {
         </div>
         {selectedClassUuid && topics.length > 0 && (
           <div className="space-y-2">
-            <Label htmlFor="topics">Topics of Focus (select none or more)</Label>
+            <Label htmlFor="topics">Topics of Focus (optional)</Label>
             <p className="text-sm"><em>Your selections will act as suggestions for the AI model to use to generate questions. The questions may not reflect only the selected topics.</em></p>
             <ScrollArea className="h-64 border-2 rounded-lg">
               <ToggleGroup type="multiple" onValueChange={handleTopicChange} disabled={isLoading || isButtonDisabled} className="flex flex-col space-y-2">

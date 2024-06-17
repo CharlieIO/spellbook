@@ -180,7 +180,7 @@ export class S3BlobStorageService implements IBlobStorageService {
                 }
             } catch (error) {
                 console.error(`Failed to retrieve note with key ${noteKey} from bucket ${bucketName}:`, error);
-                throw new Error(`Failed to retrieve note with key ${noteKey} from bucket ${bucketName}`);
+                // Continue to the next noteKey instead of throwing an error
             }
         }
 

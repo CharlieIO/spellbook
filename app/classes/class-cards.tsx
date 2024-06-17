@@ -38,28 +38,26 @@ export function ClassCards() {
     fetchClasses();
   }, [fetchClasses]);
 
-  const handleAddClass = async (name: string) => {
-    console.log(`Adding class: ${name}`);
-    // Assuming an API endpoint exists to add a class
-    try {
-      const response = await fetch('/api/classes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-      });
-      if (response.ok) {
-        if (currentPage === totalPages) {
-          await fetchClasses(); // Refresh classes only if on the last page
-        }
-      } else {
-        throw new Error('Failed to add class');
-      }
-    } catch (error) {
-      console.error("Failed to add class:", error);
+const handleAddClass = async (name: string) => {
+  console.log(`Adding class: ${name}`);
+  try {
+    const response = await fetch('/api/classes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    });
+    if (response.ok) {
+      setCurrentPage(1); // Reset to page 1 after adding a new class
+      await fetchClasses(); // Always refresh classes after adding
+    } else {
+      throw new Error('Failed to add class');
     }
-  };
+  } catch (error) {
+    console.error("Failed to add class:", error);
+  }
+};
 
   return (
     <>
@@ -87,4 +85,3 @@ export function ClassCards() {
     </>
   );
 }
-

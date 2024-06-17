@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       class_descriptions (description)
     `, { count: 'exact' })
     .match({ user_id: userId })
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (pageParam || limitParam) {
     const page = parseInt(pageParam || '1', 10);
