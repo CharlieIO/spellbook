@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState, useCallback } from 'react'
 import { CustomPagination } from "../components/pagination"
-import { ClassCard } from "./class-card";
+import ClassCard from "./class-card";
 import { AddClassCard } from "./add-class-card"; // Assuming you have a component for adding new class cards
 
 type ClassItem = {
