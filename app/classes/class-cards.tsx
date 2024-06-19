@@ -7,7 +7,9 @@ import { AddClassCard } from "./add-class-card"; // Assuming you have a componen
 type ClassItem = {
   uuid: string;
   name: string;
-  description?: string;
+  notesCount: number;
+  totalQuizScores: number;
+  averageQuizScore: number;
 };
 
 export function ClassCards() {
@@ -23,7 +25,9 @@ export function ClassCards() {
     setIsLoading(true); // Set loading to true when fetch starts
     try {
       const response = await fetch(`/api/classes?page=${currentPage}&limit=${cardsPerPage}`);
-      const { data, total } = await response.json();
+      const jsonResponse = await response.json();
+      console.log("Fetch response:", jsonResponse);
+      const { data, total } = jsonResponse;
       setClasses(data);
       setTotalPages(Math.ceil(total / cardsPerPage));
     } catch (error) {

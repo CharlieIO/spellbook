@@ -1,9 +1,9 @@
 import { auth } from '@clerk/nextjs/server';
-import { createClerkSupabaseClient } from 'lib/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
+import { provideDatastoreService } from '@/services/InstanceProvider';
 
 export async function POST(request: NextRequest) {
-  const client = await createClerkSupabaseClient();
+  const datastoreService = provideDatastoreService();
 
   const { userId } = auth();
 
@@ -12,11 +12,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { name } = await request.json();
-
-  const { data, error } = await client
-    .from('classes')
-    .insert({ name, user_id: userId })
-    .single();
+  const { data, error } = await datastoreService.insertClass(userId, name);
 
   if (error) {
     console.error('Error inserting class:', error);
@@ -27,7 +23,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const client = await createClerkSupabaseClient();
+  const datastoreService = provideDatastoreService();
 
   const { userId } = auth();
 
@@ -39,33 +35,23 @@ export async function GET(request: NextRequest) {
   const pageParam = url.searchParams.get('page');
   const limitParam = url.searchParams.get('limit');
 
-  let query = client
-    .from('classes')
-    .select(`
-      *,
-      class_descriptions (description)
-    `, { count: 'exact' })
-    .match({ user_id: userId })
-    .order('created_at', { ascending: false });
+  const page = pageParam ? parseInt(pageParam, 10) : 1;
+  const limit = limitParam ? parseInt(limitParam, 10) : 10;
+  const offset = (page - 1) * limit;
 
-  if (pageParam || limitParam) {
-    const page = parseInt(pageParam || '1', 10);
-    const limit = parseInt(limitParam || '10', 10);
-    const offset = (page - 1) * limit;
-    query = query.range(offset, offset + limit - 1);
-  }
-
-  const { data, error, count } = await query;
+  const { data, error, count } = await datastoreService.fetchClassesWithMetadata(userId, offset, limit);
 
   if (error) {
     console.error('Error fetching classes:', error);
     return NextResponse.json({ error: 'Failed to fetch classes' }, { status: 500 });
   }
 
-  const classesWithDescription = data.map((classItem: any) => ({
+  const classesWithNotesAndQuizData = data.classes.map((classItem: any) => ({
     ...classItem,
-    description: classItem.class_descriptions.length > 0 ? classItem.class_descriptions[0].description : null,
+    notesCount: classItem.pagesCount || 0,
+    totalQuizScores: classItem.totalQuizScores || 0,
+    averageQuizScore: classItem.averageQuizScore || 0,
   }));
 
-  return NextResponse.json({ data: classesWithDescription, total: count });
+  return NextResponse.json({ data: classesWithNotesAndQuizData, total: count });
 }

@@ -2,6 +2,7 @@ export interface IDatastoreAccessService {
     // Class-related methods
     insertClass(userId: string, className: string): Promise<{ data: any, error: any }>;
     fetchClass(userId: string, classUuid: string): Promise<{ data: any, error: any }>;
+    fetchClassesWithMetadata(userId: string, offset: number, limit: number): Promise<{ data: any, error: any, count: number }>;
     fetchClassName(classUuid: string): Promise<{ className: string, error: any }>;
     fetchClassNameFromQuizUuid(quizUuid: string): Promise<{ className: string, error: any }>;
     fetchClassesWithDescription(userId: string, classUuid: string): Promise<{ data: any, description: string | null, error: any }>;

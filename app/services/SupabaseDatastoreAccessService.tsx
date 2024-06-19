@@ -295,6 +295,93 @@ class SupabaseDatastoreAccessService implements IDatastoreAccessService {
             return { scores: [], error: err };
         }
     }
+
+
+    async fetchClassesWithMetadata(userId: string, offset: number, limit: number): Promise<{ data: { classes: any[], totalQuizScores: number, averageQuizScore: number }, error: any, count: number }> {
+        const client = await createClerkSupabaseClient();
+        try {
+            // Fetch classes for the given user ID with pagination, ordered by created_at descending
+            const { data, error, count } = await client
+                .from('classes')
+                .select('*', { count: 'exact' })
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .range(offset, offset + limit - 1);
+
+            if (error) {
+                return { data: { classes: [], totalQuizScores: 0, averageQuizScore: 0 }, error, count: 0 };
+            }
+
+            // Fetch the number of pages for each class
+            const classUuids = data.map((classItem: { uuid: string }) => classItem.uuid);
+            const { data: notesData, error: notesError } = await client
+                .from('notes')
+                .select('class_uuid');
+
+            if (notesError) {
+                return { data: { classes: [], totalQuizScores: 0, averageQuizScore: 0 }, error: notesError, count: 0 };
+            }
+
+            // Count the number of pages for each class
+            const pagesCountMap = notesData.reduce((acc: any, note: { class_uuid: string }) => {
+                if (!acc[note.class_uuid]) {
+                    acc[note.class_uuid] = 0;
+                }
+                acc[note.class_uuid]++;
+                return acc;
+            }, {});
+
+            // Fetch quiz records for the classes
+            const { data: quizRecordsData, error: quizRecordsError } = await client
+                .from('quiz_records')
+                .select('quiz_uuid, class_uuid');
+
+            if (quizRecordsError) {
+                return { data: { classes: [], totalQuizScores: 0, averageQuizScore: 0 }, error: quizRecordsError, count: count ?? 0 };
+            }
+
+            const quizUuids = quizRecordsData.map((record: { quiz_uuid: string }) => record.quiz_uuid);
+
+            // Fetch quiz scores for the quizzes
+            const { data: quizScoresData, error: quizScoresError } = await client
+                .from('quiz_scores')
+                .select('quiz_uuid, score')
+                .in('quiz_uuid', quizUuids);
+
+            if (quizScoresError) {
+                return { data: { classes: [], totalQuizScores: 0, averageQuizScore: 0 }, error: quizScoresError, count: count ?? 0 };
+            }
+
+            // Map quiz scores to their respective classes
+            const quizScoresMap = quizRecordsData.reduce((acc: any, record: { quiz_uuid: string, class_uuid: string }) => {
+                const scores = quizScoresData.filter((score: { quiz_uuid: string }) => score.quiz_uuid === record.quiz_uuid);
+                if (!acc[record.class_uuid]) {
+                    acc[record.class_uuid] = { totalScores: 0, totalScoreSum: 0 };
+                }
+                scores.forEach((score: { score: number }) => {
+                    acc[record.class_uuid].totalScores++;
+                    acc[record.class_uuid].totalScoreSum += score.score;
+                });
+                return acc;
+            }, {});
+
+            const classesWithPagesAndScores = data.map((classItem: any) => {
+                const quizData = quizScoresMap[classItem.uuid] || { totalScores: 0, totalScoreSum: 0 };
+                const averageQuizScore = quizData.totalScores > 0 ? quizData.totalScoreSum / quizData.totalScores : 0;
+                return {
+                    ...classItem,
+                    pagesCount: pagesCountMap[classItem.uuid] || 0,
+                    totalQuizScores: quizData.totalScores,
+                    averageQuizScore
+                };
+            });
+
+            return { data: { classes: classesWithPagesAndScores, totalQuizScores: 0, averageQuizScore: 0 }, error: null, count: count ?? 0 };
+        } catch (err) {
+            console.error('Error fetching classes:', err);
+            return { data: { classes: [], totalQuizScores: 0, averageQuizScore: 0 }, error: err, count: 0 };
+        }
+    }
 }
 
 export default SupabaseDatastoreAccessService;

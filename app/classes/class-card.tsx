@@ -5,7 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 type ClassItem = {
   uuid: string;
   name: string;
-  description?: string;
+  notesCount: number;
+  totalQuizScores: number;
+  averageQuizScore: number;
 };
 
 type ClassCardProps = {
@@ -38,7 +40,9 @@ export const ClassCard: React.FC<ClassCardProps> = ({ classItem, isLoading = fal
           <CardTitle>{classItem.name}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="min-h-[3rem]">{classItem.description}</p>
+          <p style={{ fontFamily: 'Courier New, monospace', fontStyle: 'italic' }}>Notes uploaded: {classItem.notesCount}</p>
+          <p style={{ fontFamily: 'Courier New, monospace', fontStyle: 'italic' }}>Quizzes taken: {classItem.totalQuizScores}</p>
+          <p style={{ fontFamily: 'Courier New, monospace', fontStyle: 'italic' }}>Average quiz score: {classItem.averageQuizScore}</p>
         </CardContent>
       </Card>
     </Link>
