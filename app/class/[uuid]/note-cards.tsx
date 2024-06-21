@@ -13,6 +13,7 @@ import { useImageFetcher } from "./hooks/useImageFetcher"; // Import useImageFet
 import { useFileUploader } from "./hooks/useFileUploader"; // Import useFileUploader hook
 import { useImageDeleter } from "./hooks/useImageDeleter"; // Import useImageDeleter hook
 import usePagination from "./hooks/usePagination"; // Import usePagination hook
+import ProcessingStatus from "./processing-status";
 
 interface NoteManagementProps {
   classUuid: string;
@@ -40,6 +41,9 @@ export function NoteManagement({ classUuid }: NoteManagementProps) {
     <main className="flex flex-col items-center justify-center w-full h-full p-4 md:p-6 lg:p-8">
       <div className="max-w-3xl w-full">
         <UploadImage onUpload={enhancedHandleUpload} />
+        <div className="px-4 pb-10 max-w-md mx-auto">
+          <ProcessingStatus uuid={classUuid} />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {isLoading ? (
             Array.from({ length: imagesPerPage }, (_, index) => (

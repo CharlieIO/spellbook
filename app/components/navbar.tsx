@@ -35,11 +35,6 @@ export default function NavBar() {
                   </NavigationMenuLink> 
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="#" className={`${navigationMenuTriggerStyle()} bg-background text-xl py-2`}>
-                    <s>Insights</s>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
                   <NavigationMenuLink href="/quizzes" className={`${navigationMenuTriggerStyle()} bg-background text-xl py-2`}>
                     Practice Quizzes
                   </NavigationMenuLink>
@@ -56,11 +51,6 @@ export default function NavBar() {
             <NavigationMenuItem>
               <NavigationMenuLink href="/classes" className={`${navigationMenuTriggerStyle()} bg-background`}>
                 My Classes
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="#" className={`${navigationMenuTriggerStyle()} bg-background`}>
-                <s>Insights</s>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
