@@ -9,6 +9,7 @@ RUN pip install --target ./package -r requirements.txt
 
 COPY utils/s3_utils.py ./package/utils/
 COPY utils/lambda_utils.py ./package/utils/
+COPY utils/retry.py ./package/utils/
 COPY functions/quizGenerationOrchestrator/lambda_function.py ./package/
 
 RUN cd package && zip -r ../function.zip .

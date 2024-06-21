@@ -4,20 +4,23 @@ import boto3
 from botocore.exceptions import ClientError
 from utils.lambda_utils import invoke_lambda
 from utils.s3_utils import get_s3_object_as_text, put_s3_object
+from utils.retry import retry_operation
 
 sqs_client = boto3.client('sqs')
+
+S3_BUCKET_NAME_OCR_RESULTS = 'spellbook-imagestore-ocr-results'
+S3_BUCKET_NAME_GENERATED_QUIZZES = 'spellbook-generated-quizzes'
 
 def score_page(content: str) -> int:
     return len(content.split())
 
 def fetch_note_content(note_key: str) -> str:
-    s3_bucket_name = 'spellbook-imagestore-ocr-results'
     s3_key = f'processed/{note_key}'
     try:
-        return get_s3_object_as_text(s3_bucket_name, s3_key)
+        return retry_operation(get_s3_object_as_text, S3_BUCKET_NAME_OCR_RESULTS, s3_key)
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':
-            print(f"Error: The key {s3_key} does not exist in bucket {s3_bucket_name}.")
+            print(f"Error: The key {s3_key} does not exist in bucket {S3_BUCKET_NAME_OCR_RESULTS}.")
             return None
         else:
             raise
@@ -91,7 +94,7 @@ def lambda_handler(event, context):
                     'numQuestions': num_questions_for_note,
                     'topics': topics
                 }
-                response = invoke_lambda('quizGeneration', payload)
+                response = retry_operation(invoke_lambda, 'quizGeneration', payload)
                 results.append(response)
                 total_llm_requested_questions += num_questions_for_note
                 total_actual_questions += len(response['body']['questions'])
@@ -99,9 +102,8 @@ def lambda_handler(event, context):
         combined_quiz = {'questions': [q for result in results for q in result['body']['questions']]}
         combined_quizzes.append(combined_quiz)
 
-        s3_bucket_name = 'spellbook-generated-quizzes'
         s3_key = f'quizzes/{job_id}.json'
-        put_s3_object(s3_bucket_name, s3_key, json.dumps(combined_quiz))
+        retry_operation(put_s3_object, S3_BUCKET_NAME_GENERATED_QUIZZES, s3_key, json.dumps(combined_quiz))
 
     return {
         'statusCode': 200,

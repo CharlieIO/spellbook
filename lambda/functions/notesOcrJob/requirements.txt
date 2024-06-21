@@ -1,2 +1,2 @@
-google-cloud-documentai==2.27.0
-boto3==1.34.99
+google-cloud-documentai
+boto3

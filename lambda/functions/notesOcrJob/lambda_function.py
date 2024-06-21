@@ -4,6 +4,12 @@ import os
 from google.cloud.documentai_v1 import DocumentProcessorServiceClient
 from google.oauth2 import service_account
 from utils.s3_utils import get_s3_object, put_s3_object, head_s3_object
+from utils.retry import retry_operation
+
+PROCESSOR_ID = 'c2feb52c92e94301'
+PROJECT_ID = 'notes-helper-383322'
+LOCATION = 'us'
+OUTPUT_BUCKET_NAME = 'spellbook-imagestore-ocr-results'
 
 def lambda_handler(event, context):
     # Document AI setup
@@ -13,10 +19,7 @@ def lambda_handler(event, context):
         raise ValueError("Environment variable for GOOGLE_APPLICATION_CREDENTIALS_JSON is missing")
     credentials = service_account.Credentials.from_service_account_info(json.loads(credentials_json))
     client = DocumentProcessorServiceClient(credentials=credentials)
-    processor_id = 'c2feb52c92e94301'
-    project_id = 'notes-helper-383322'
-    location = 'us'
-    name = client.processor_path(project_id, location, processor_id)
+    name = client.processor_path(PROJECT_ID, LOCATION, PROCESSOR_ID)
     print("Google Document AI client initialized with processor path.")
 
     # Check if the event contains the necessary S3 information
@@ -31,12 +34,12 @@ def lambda_handler(event, context):
         key = record['s3']['object']['key']
         print(f"Processing S3 bucket: {bucket_name}, Key: {key}")
 
-        # Get the document from S3
-        document_content = get_s3_object(bucket_name, key)
+        # Get the document from S3 with retries
+        document_content = retry_operation(get_s3_object, bucket_name, key)
         print("Document retrieved from S3.")
 
-        # Retrieve the Content-Type from the metadata
-        response = head_s3_object(bucket_name, key)
+        # Retrieve the Content-Type from the metadata with retries
+        response = retry_operation(head_s3_object, bucket_name, key)
         mime_type = response['ContentType']
         print(f"Retrieved Content-Type: {mime_type}")
 
@@ -50,16 +53,15 @@ def lambda_handler(event, context):
         request = {"name": name, "raw_document": document}
         print("Request prepared for Google Document AI.")
 
-        # Process the document using Document AI
-        result = client.process_document(request=request)
+        # Process the document using Document AI with retries
+        result = retry_operation(client.process_document, request=request)
         document_text = result.document.text
         print("Document processed by Google Document AI.")
 
-        # Output the results to a different S3 bucket
-        output_bucket_name = 'spellbook-imagestore-ocr-results'
+        # Output the results to a different S3 bucket with retries
         output_key = f'processed/{key}'
-        put_s3_object(output_bucket_name, output_key, document_text)
-        print(f"Processed document text saved to S3 bucket: {output_bucket_name}, Key: {output_key}")
+        retry_operation(put_s3_object, OUTPUT_BUCKET_NAME, output_key, document_text)
+        print(f"Processed document text saved to S3 bucket: {OUTPUT_BUCKET_NAME}, Key: {output_key}")
 
         processed_count += 1
 

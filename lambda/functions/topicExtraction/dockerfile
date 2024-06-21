@@ -11,6 +11,7 @@ COPY utils/groq_llm.py ./package/utils/
 COPY utils/openai_llm.py ./package/utils/
 COPY utils/llm_interface.py ./package/utils/
 COPY utils/s3_utils.py ./package/utils/
+COPY utils/retry.py ./package/utils/
 COPY functions/topicExtraction/lambda_function.py ./package/
 
 RUN cd package && zip -r ../function.zip .

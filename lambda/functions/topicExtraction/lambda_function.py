@@ -4,6 +4,10 @@ from utils.groq_llm import GroqLLM
 from utils.openai_llm import OpenAILLM
 from utils.s3_utils import get_s3_object, put_s3_object
 from utils.llm_interface import LLMInterface
+from utils.retry import retry_operation
+
+DEFAULT_LLM_PROVIDER = 'groq'
+OUTPUT_BUCKET_NAME = 'spellbook-topic-extraction-results'
 
 def get_llm_provider(provider_name: str) -> LLMInterface:
     if provider_name == 'openai':
@@ -19,7 +23,7 @@ def lambda_handler(event, context):
         raise ValueError("No records found in the event")
 
     processed_count = 0
-    llm_provider_name = os.getenv('LLM_PROVIDER', 'groq')
+    llm_provider_name = os.getenv('LLM_PROVIDER', DEFAULT_LLM_PROVIDER)
     llm = get_llm_provider(llm_provider_name)
 
     for record in event['Records']:
@@ -27,16 +31,15 @@ def lambda_handler(event, context):
         key = record['s3']['object']['key']
         print(f"Processing S3 bucket: {bucket_name}, Key: {key}")
 
-        ocr_text = get_s3_object(bucket_name, key).decode('utf-8')
+        ocr_text = retry_operation(get_s3_object, bucket_name, key).decode('utf-8')
         print("OCR'd text retrieved from S3.")
 
-        topics = llm.extract_topics(ocr_text)
+        topics = retry_operation(llm.extract_topics, ocr_text)
         print(f"Extracted topics: {topics}")
 
-        output_bucket_name = 'spellbook-topic-extraction-results'
         output_key = f'topics/{key}'
-        put_s3_object(output_bucket_name, output_key, json.dumps(topics))
-        print(f"Extracted topics saved to S3 bucket: {output_bucket_name}, Key: {output_key}")
+        retry_operation(put_s3_object, OUTPUT_BUCKET_NAME, output_key, json.dumps(topics))
+        print(f"Extracted topics saved to S3 bucket: {OUTPUT_BUCKET_NAME}, Key: {output_key}")
 
         processed_count += 1
 
