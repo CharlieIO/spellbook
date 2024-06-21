@@ -63,7 +63,7 @@ const ProcessingStatus: React.FC<ProcessingStatusProps> = ({ uuid }) => {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">{processedNotes} / {totalNotes}</span>
               </div>
-              <span className="text-sm italic">Notes won't be used for exams until processing is complete.</span>
+              <span className="text-sm italic">Notes won&apos;t be used for exams until processing is complete.</span>
               <Progress value={progress} className="w-full" />
             </div>
           </AlertDescription>
